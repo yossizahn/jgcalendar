@@ -1,4 +1,4 @@
-import { Info, Languages, LogOut, Moon, Settings2, Sun, UserRound } from "lucide-react"
+import { Info, Languages, LogOut, Monitor, Moon, Settings2, Sun, UserRound } from "lucide-react"
 import { useState } from "react"
 import type { AppEvent } from "@/hooks/useGoogle"
 import { About } from "@/components/About"
@@ -13,11 +13,13 @@ import {
   DropdownMenuGroup,
   DropdownMenuItem,
   DropdownMenuLabel,
+  DropdownMenuRadioGroup,
+  DropdownMenuRadioItem,
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
 import { useCalendarData, useGoogleAuth } from "@/hooks/useGoogle"
-import { useTheme } from "@/hooks/useTheme"
+import { type Theme, useTheme } from "@/hooks/useTheme"
 import { useI18n } from "@/i18n"
 import { clientIdFromEnv, type GCalendar, getClientId, setClientId, type UserProfile } from "@/lib/google"
 
@@ -71,7 +73,7 @@ export default function App() {
           <div className="flex items-center gap-1">
             <AboutButton onClick={() => setAboutOpen(true)} />
             <LanguageToggle />
-            <ThemeToggle />
+            <ThemeMenu />
             {signedIn && (
               <DropdownMenu>
                 <DropdownMenuTrigger render={<Button variant="ghost" className="ms-1 h-9 gap-2 px-1.5" />}>
@@ -220,15 +222,11 @@ function AboutButton({ onClick }: { onClick: () => void }) {
   )
 }
 
+/** Switches to the other language. Until clicked, the language follows the browser's preferences. */
 function LanguageToggle() {
   const { t, lang, setLang } = useI18n()
   return (
-    <Button
-      variant="ghost"
-      className="h-9 gap-1.5 px-2.5"
-      onClick={() => setLang(lang === "he" ? "en" : "he")}
-      aria-label={t.header.otherLanguageAria}
-    >
+    <Button variant="ghost" className="h-9 gap-1.5 px-2.5" onClick={() => setLang(lang === "he" ? "en" : "he")} aria-label={t.header.otherLanguageAria}>
       <Languages />{" "}
       <span className="max-sm:hidden" lang={lang === "he" ? "en" : "he"}>
         {t.header.otherLanguage}
@@ -237,13 +235,31 @@ function LanguageToggle() {
   )
 }
 
-function ThemeToggle() {
+function ThemeMenu() {
   const { t } = useI18n()
-  const { resolvedTheme, setTheme } = useTheme()
-  const dark = resolvedTheme === "dark"
+  const { theme, setTheme } = useTheme()
+  const Icon = theme === "system" ? Monitor : theme === "dark" ? Moon : Sun
   return (
-    <Button variant="ghost" size="icon" onClick={() => setTheme(dark ? "light" : "dark")} aria-label={t.header.toggleTheme}>
-      {dark ? <Sun /> : <Moon />}
-    </Button>
+    <DropdownMenu>
+      <DropdownMenuTrigger render={<Button variant="ghost" size="icon" aria-label={t.header.theme} />}>
+        <Icon />
+      </DropdownMenuTrigger>
+      <DropdownMenuContent align="end" className="w-44">
+        <DropdownMenuGroup>
+          <DropdownMenuLabel>{t.header.theme}</DropdownMenuLabel>
+          <DropdownMenuRadioGroup value={theme} onValueChange={(v) => setTheme(v as Theme)}>
+            <DropdownMenuRadioItem value="system">
+              <Monitor /> {t.header.themeSystem}
+            </DropdownMenuRadioItem>
+            <DropdownMenuRadioItem value="light">
+              <Sun /> {t.header.themeLight}
+            </DropdownMenuRadioItem>
+            <DropdownMenuRadioItem value="dark">
+              <Moon /> {t.header.themeDark}
+            </DropdownMenuRadioItem>
+          </DropdownMenuRadioGroup>
+        </DropdownMenuGroup>
+      </DropdownMenuContent>
+    </DropdownMenu>
   )
 }

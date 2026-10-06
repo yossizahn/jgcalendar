@@ -18,7 +18,10 @@ export const en = {
     switchAccount: "Switch account",
     changeClientId: "Change client ID",
     signOut: "Sign out",
-    toggleTheme: "Toggle dark mode",
+    theme: "Theme",
+    themeSystem: "System",
+    themeLight: "Light",
+    themeDark: "Dark",
     /** Label of the button that switches to the *other* language. */
     otherLanguage: "עברית",
     otherLanguageAria: "Switch to Hebrew",

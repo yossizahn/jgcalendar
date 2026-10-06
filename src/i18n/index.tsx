@@ -8,14 +8,19 @@ export type Messages = typeof en
 const KEY = "lang"
 const MESSAGES: Record<Lang, Messages> = { en, he }
 
-function initialLang(): Lang {
+/** An explicit choice saved by the language switch, or null to follow the browser. */
+function savedLang(): Lang | null {
   try {
     const saved = localStorage.getItem(KEY)
     if (saved === "en" || saved === "he") return saved
   } catch {
     /* storage unavailable */
   }
-  // Respect the user's preference order: the first of English/Hebrew wins.
+  return null
+}
+
+/** The first of English/Hebrew in the browser's preference order (English if neither is listed). */
+function browserLang(): Lang {
   const first = navigator.languages.find((l) => /^(en|he|iw)\b/i.test(l))
   return first && /^(he|iw)\b/i.test(first) ? "he" : "en"
 }
@@ -38,8 +43,17 @@ interface I18n {
 const I18nContext = createContext<I18n | null>(null)
 
 export function I18nProvider({ children }: { children: ReactNode }) {
-  const [lang, setLangState] = useState<Lang>(initialLang)
+  const [chosen, setChosen] = useState<Lang | null>(savedLang)
+  const [detected, setDetected] = useState<Lang>(browserLang)
+  const lang = chosen ?? detected
   const dir = lang === "he" ? "rtl" : "ltr"
+
+  // Until the user picks a language, follow changes to the browser's language settings.
+  useEffect(() => {
+    const update = () => setDetected(browserLang())
+    window.addEventListener("languagechange", update)
+    return () => window.removeEventListener("languagechange", update)
+  }, [])
 
   useEffect(() => {
     document.documentElement.lang = lang
@@ -53,7 +67,7 @@ export function I18nProvider({ children }: { children: ReactNode }) {
     } catch {
       /* storage unavailable */
     }
-    setLangState(l)
+    setChosen(l)
   }, [])
 
   const value = useMemo(() => ({ lang, setLang, t: MESSAGES[lang], dir, locale: intlLocale(lang) }) as const, [lang, setLang, dir])
