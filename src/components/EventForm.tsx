@@ -4,7 +4,6 @@ import {
   CalendarCheck2,
   CalendarDays,
   Check,
-  ChevronDown,
   Clock,
   Code2,
   Copy,
@@ -76,7 +75,6 @@ export function EventForm({ calendars, onCreated, onError, editing, onSaved, onC
   const [description, setDescription] = useState(initial?.description ?? "")
   const [submitting, setSubmitting] = useState(false)
   const [copied, setCopied] = useState(false)
-  const [optionsOpen, setOptionsOpen] = useState(false)
   const [showRule, setShowRule] = useState(false)
 
   // Bring the form into view when an edit starts (the list is further down the page).
@@ -216,8 +214,6 @@ export function EventForm({ calendars, onCreated, onError, editing, onSaved, onC
   ]
 
   const reminderLabel = t.reminders[reminderOptions.find((o) => String(o.value) === String(reminder))?.label ?? "default"]
-  const endLabel =
-    endType === "count" ? t.form.timesCount(Math.max(1, count || 1)) : endType === "until" && untilDate ? t.form.untilDate(shortDate.format(untilDate)) : t.form.forever
 
   return (
     <div ref={cardRef} className="scroll-mt-20 space-y-6">
@@ -325,144 +321,119 @@ export function EventForm({ calendars, onCreated, onError, editing, onSaved, onC
             </div>
           )}
 
-          {/* Event details: a titled sheet with a plain-language summary; sections when opened */}
+          {/* Event details: labelled sections */}
           <div className="rounded-md border">
-            <button
-              type="button"
-              onClick={() => setOptionsOpen((o) => !o)}
-              aria-expanded={optionsOpen}
-              className="flex w-full items-center gap-3 px-4 py-3 text-start transition-colors hover:bg-muted/50"
-            >
-              <span className="min-w-0 flex-1">
-                <span className="block font-display text-base font-semibold">{t.form.detailsTitle}</span>
-                <span className="block truncate text-sm text-muted-foreground">
-                  {[
-                    interval > 1 ? `${t.form.every} ${interval} ${t.form.unit(freq, interval)}` : null,
-                    endLabel,
-                    allDay ? t.form.allDay : `${startTime}–${endTime}`,
-                    calendar ? calName(calendar) : null,
-                    reminderLabel,
-                  ]
-                    .filter(Boolean)
-                    .join(" · ")}
-                </span>
-              </span>
-              <span className="shrink-0 text-sm font-medium text-primary">{optionsOpen ? t.form.done : t.form.change}</span>
-              <ChevronDown className={cn("size-4 shrink-0 text-muted-foreground transition-transform", optionsOpen && "rotate-180")} />
-            </button>
-
-            {optionsOpen && (
-              <div className="divide-y border-t">
-                <DetailRow icon={Repeat} label={t.form.repeatSection}>
-                  <div className="space-y-3">
-                    <div className="flex items-center gap-2 text-sm">
-                      {t.form.every}
-                      <Input
-                        type="number"
-                        min={1}
-                        max={99}
-                        value={interval}
-                        onChange={(e) => setRepeatInterval(Number(e.target.value))}
-                        className="h-8 w-14 text-center"
-                        aria-label={t.form.intervalAria}
-                      />
-                      {t.form.unit(freq, interval)}
-                    </div>
-                    <div className="flex flex-wrap items-center gap-2">
-                      <span className="text-sm text-muted-foreground">{t.form.ends}</span>
-                      <Segmented
-                        aria-label={t.form.ends}
-                        value={endType}
-                        onChange={setEndType}
-                        options={[
-                          { value: "never", label: t.form.never },
-                          { value: "count", label: t.form.after },
-                          { value: "until", label: t.form.onDate },
-                        ]}
-                        className="h-8 [&>*]:px-2.5 [&>*]:text-xs"
-                      />
-                      {endType === "count" && (
-                        <span className="flex items-center gap-2 text-sm">
-                          <Input
-                            type="number"
-                            min={1}
-                            value={count}
-                            onChange={(e) => setCount(Number(e.target.value))}
-                            className="h-8 w-16 text-center"
-                            aria-label={t.form.countAria}
-                          />
-                          {t.form.times}
-                        </span>
-                      )}
-                      {endType === "until" && (
-                        <Input type="date" value={until} onChange={(e) => setUntil(e.target.value)} className="h-8 w-40" aria-label={t.form.endDateAria} />
-                      )}
-                    </div>
+            <h3 className="border-b px-4 py-3 font-display text-base font-semibold">{t.form.detailsTitle}</h3>
+            <div className="divide-y">
+              <DetailRow icon={Repeat} label={t.form.repeatSection}>
+                <div className="space-y-3">
+                  <div className="flex items-center gap-2 text-sm">
+                    {t.form.every}
+                    <Input
+                      type="number"
+                      min={1}
+                      max={99}
+                      value={interval}
+                      onChange={(e) => setRepeatInterval(Number(e.target.value))}
+                      className="h-8 w-14 text-center"
+                      aria-label={t.form.intervalAria}
+                    />
+                    {t.form.unit(freq, interval)}
                   </div>
-                </DetailRow>
-
-                <DetailRow icon={Clock} label={t.form.timeSection}>
-                  <div className="flex flex-wrap items-center gap-x-4 gap-y-2">
-                    <label className="flex cursor-pointer items-center gap-2.5 text-sm">
-                      <Switch
-                        checked={allDay}
-                        onCheckedChange={(v) => {
-                          setAllDay(v)
-                          setReminder("default")
-                        }}
-                      />
-                      {t.form.allDay}
-                    </label>
-                    {!allDay && (
-                      <div className="flex flex-wrap items-center gap-2 text-sm">
-                        <Input type="time" value={startTime} onChange={(e) => setStartTime(e.target.value)} className="h-8 w-28" aria-label={t.form.startTimeAria} />
-                        <span className="text-muted-foreground">{t.form.to}</span>
-                        <Input type="time" value={endTime} onChange={(e) => setEndTime(e.target.value)} className="h-8 w-28" aria-label={t.form.endTimeAria} />
-                        <span dir="ltr" className="text-xs text-muted-foreground">
-                          {timeZone.replace(/_/g, " ")}
-                        </span>
-                      </div>
+                  <div className="flex flex-wrap items-center gap-2">
+                    <span className="text-sm text-muted-foreground">{t.form.ends}</span>
+                    <Segmented
+                      aria-label={t.form.ends}
+                      value={endType}
+                      onChange={setEndType}
+                      options={[
+                        { value: "never", label: t.form.never },
+                        { value: "count", label: t.form.after },
+                        { value: "until", label: t.form.onDate },
+                      ]}
+                      className="h-8 [&>*]:px-2.5 [&>*]:text-xs"
+                    />
+                    {endType === "count" && (
+                      <span className="flex items-center gap-2 text-sm">
+                        <Input
+                          type="number"
+                          min={1}
+                          value={count}
+                          onChange={(e) => setCount(Number(e.target.value))}
+                          className="h-8 w-16 text-center"
+                          aria-label={t.form.countAria}
+                        />
+                        {t.form.times}
+                      </span>
+                    )}
+                    {endType === "until" && (
+                      <Input type="date" value={until} onChange={(e) => setUntil(e.target.value)} className="h-8 w-40" aria-label={t.form.endDateAria} />
                     )}
                   </div>
-                </DetailRow>
+                </div>
+              </DetailRow>
 
-                <DetailRow icon={CalendarDays} label={t.form.calendar}>
-                  <Select value={calendar?.id ?? null} onValueChange={(v) => v && setCalendarId(v)}>
-                    <SelectTrigger className="h-8 w-full max-w-xs">
-                      <SelectValue>
-                        {calendar ? <CalendarOption cal={calendar} /> : <span className="text-muted-foreground">{t.form.loading}</span>}
-                      </SelectValue>
-                    </SelectTrigger>
-                    <SelectContent>
-                      {calendars?.map((c) => (
-                        <SelectItem key={c.id} value={c.id}>
-                          <CalendarOption cal={c} />
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                </DetailRow>
+              <DetailRow icon={Clock} label={t.form.timeSection}>
+                <div className="flex flex-wrap items-center gap-x-4 gap-y-2">
+                  <label className="flex cursor-pointer items-center gap-2.5 text-sm">
+                    <Switch
+                      checked={allDay}
+                      onCheckedChange={(v) => {
+                        setAllDay(v)
+                        setReminder("default")
+                      }}
+                    />
+                    {t.form.allDay}
+                  </label>
+                  {!allDay && (
+                    <div className="flex flex-wrap items-center gap-2 text-sm">
+                      <Input type="time" value={startTime} onChange={(e) => setStartTime(e.target.value)} className="h-8 w-28" aria-label={t.form.startTimeAria} />
+                      <span className="text-muted-foreground">{t.form.to}</span>
+                      <Input type="time" value={endTime} onChange={(e) => setEndTime(e.target.value)} className="h-8 w-28" aria-label={t.form.endTimeAria} />
+                      <span dir="ltr" className="text-xs text-muted-foreground">
+                        {timeZone.replace(/_/g, " ")}
+                      </span>
+                    </div>
+                  )}
+                </div>
+              </DetailRow>
 
-                <DetailRow icon={Bell} label={t.form.reminder}>
-                  <Select value={String(reminder)} onValueChange={(v) => v && setReminder(v === "default" || v === "none" || v === "keep" ? v : Number(v))}>
-                    <SelectTrigger className="h-8 w-full max-w-xs">
-                      <SelectValue>{reminderLabel}</SelectValue>
-                    </SelectTrigger>
-                    <SelectContent>
-                      {reminderOptions.map((o) => (
-                        <SelectItem key={String(o.value)} value={String(o.value)}>
-                          {t.reminders[o.label]}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                </DetailRow>
+              <DetailRow icon={CalendarDays} label={t.form.calendar}>
+                <Select value={calendar?.id ?? null} onValueChange={(v) => v && setCalendarId(v)}>
+                  <SelectTrigger className="h-8 w-full max-w-xs">
+                    <SelectValue>
+                      {calendar ? <CalendarOption cal={calendar} /> : <span className="text-muted-foreground">{t.form.loading}</span>}
+                    </SelectValue>
+                  </SelectTrigger>
+                  <SelectContent>
+                    {calendars?.map((c) => (
+                      <SelectItem key={c.id} value={c.id}>
+                        <CalendarOption cal={c} />
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </DetailRow>
 
-                <DetailRow icon={NotebookPen} label={t.form.descriptionLabel} hint={t.form.optional}>
-                  <Textarea id="desc" value={description} onChange={(e) => setDescription(e.target.value)} rows={2} placeholder={t.form.descriptionPlaceholder} />
-                </DetailRow>
-              </div>
-            )}
+              <DetailRow icon={Bell} label={t.form.reminder}>
+                <Select value={String(reminder)} onValueChange={(v) => v && setReminder(v === "default" || v === "none" || v === "keep" ? v : Number(v))}>
+                  <SelectTrigger className="h-8 w-full max-w-xs">
+                    <SelectValue>{reminderLabel}</SelectValue>
+                  </SelectTrigger>
+                  <SelectContent>
+                    {reminderOptions.map((o) => (
+                      <SelectItem key={String(o.value)} value={String(o.value)}>
+                        {t.reminders[o.label]}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </DetailRow>
+
+              <DetailRow icon={NotebookPen} label={t.form.descriptionLabel} hint={t.form.optional}>
+                <Textarea id="desc" value={description} onChange={(e) => setDescription(e.target.value)} rows={2} placeholder={t.form.descriptionPlaceholder} />
+              </DetailRow>
+            </div>
           </div>
 
           <div className="space-y-2">
