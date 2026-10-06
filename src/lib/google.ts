@@ -13,7 +13,10 @@ const PROFILE_SCOPES = ["email", "profile"]
 const SCOPES = [...SCOPE_LIST, ...PROFILE_SCOPES].join(" ")
 
 const API = "https://www.googleapis.com/calendar/v3"
-const TOKEN_KEY = "hrg.token"
+/** Shared by all tabs (localStorage); Google access tokens expire after about an hour. */
+export const TOKEN_KEY = "hrg.token"
+/** The last account used, for a one-click "Continue as …". Cleared on sign out. */
+export const ACCOUNT_KEY = "hrg.account"
 const CLIENT_ID_KEY = "hrg.clientId"
 
 /** Marker stored on every event we create, so we can list them later. */
@@ -68,7 +71,7 @@ export class SignInError extends Error {
 
 export function loadToken(): StoredToken | null {
   try {
-    const raw = sessionStorage.getItem(TOKEN_KEY)
+    const raw = localStorage.getItem(TOKEN_KEY)
     if (!raw) return null
     const t = JSON.parse(raw) as StoredToken
     // Treat tokens about to expire as expired.
@@ -80,8 +83,8 @@ export function loadToken(): StoredToken | null {
 
 function saveToken(t: StoredToken | null) {
   try {
-    if (t) sessionStorage.setItem(TOKEN_KEY, JSON.stringify(t))
-    else sessionStorage.removeItem(TOKEN_KEY)
+    if (t) localStorage.setItem(TOKEN_KEY, JSON.stringify(t))
+    else localStorage.removeItem(TOKEN_KEY)
   } catch {
     /* storage unavailable */
   }
@@ -131,9 +134,34 @@ export async function requestToken(opts: { hint?: string; prompt?: "" | "consent
   })
 }
 
+/** Milliseconds until the stored token should be treated as expired (0 if none). */
+export function tokenTimeLeft(): number {
+  const t = loadToken()
+  return t ? Math.max(0, t.expiresAt - 60_000 - Date.now()) : 0
+}
+
+export function loadAccount(): UserProfile | null {
+  try {
+    const raw = localStorage.getItem(ACCOUNT_KEY)
+    return raw ? (JSON.parse(raw) as UserProfile) : null
+  } catch {
+    return null
+  }
+}
+
+export function saveAccount(p: UserProfile | null) {
+  try {
+    if (p?.email) localStorage.setItem(ACCOUNT_KEY, JSON.stringify({ name: p.name, email: p.email, picture: p.picture }))
+    else localStorage.removeItem(ACCOUNT_KEY)
+  } catch {
+    /* storage unavailable */
+  }
+}
+
 export function signOut() {
   const t = loadToken()
   saveToken(null)
+  saveAccount(null)
   if (t && window.google?.accounts?.oauth2) google.accounts.oauth2.revoke(t.accessToken, () => {})
 }
 

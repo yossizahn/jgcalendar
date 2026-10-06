@@ -36,6 +36,7 @@ export const he: Messages = {
     datesBy: "תאריכים עבריים באמצעות",
     privacy: "פרטיות",
     terms: "תנאי שימוש",
+    source: "קוד המקור ב־GitHub",
   },
 
   landing: {
@@ -43,8 +44,9 @@ export const he: Messages = {
     body:
       "ימי הולדת, ימי זיכרון (יארצייט), ימי נישואין. יומן Google יודע לחזור על אירועים לפי הלוח העברי, אבל באפליקציה שלו אין לזה הגדרה. בוחרים כאן את התאריך, והוא נוסף ליומן שלכם ויופיע ביום הנכון בכל שנה.",
     connect: "חיבור ליומן Google",
-    reconnect: "התחברות מחדש ליומן Google",
-    expired: "פג תוקף החיבור ל־Google. יש להתחבר מחדש כדי להמשיך.",
+    continueAs: (name) => `המשך בתור ${name}`,
+    useAnother: "חשבון אחר",
+    signedInBefore: (email) => `בפעם הקודמת התחברתם עם ${email}.`,
     privacy: "פועל כולו בדפדפן, ללא שרת. יש לו גישה רק לפרופיל שלכם, לרשימת היומנים ולניהול אירועים.",
     howItWorks: "איך זה עובד?",
     exampleTitle: "יום ההולדת של סבתא",
@@ -73,6 +75,12 @@ export const he: Messages = {
         נשמר בדפדפן הזה בלבד. כדי לקבע אותו בבנייה, הגדירו {code("VITE_GOOGLE_CLIENT_ID")} בקובץ {code(".env.local")}.
       </>
     ),
+  },
+
+  session: {
+    expired: "החיבור ל־Google הסתיים (Google מגביל אותו לכשעה). מה שמילאתם כאן נשמר.",
+    continueAs: (name) => `המשך בתור ${name}`,
+    reconnect: "התחברות מחדש",
   },
 
   calendar: {

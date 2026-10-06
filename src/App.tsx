@@ -2,6 +2,7 @@ import { Info, Languages, LogOut, Monitor, Moon, Settings2, Sun, UserRound } fro
 import { useState } from "react"
 import type { AppEvent } from "@/hooks/useGoogle"
 import { About } from "@/components/About"
+import { Avatar } from "@/components/Avatar"
 import { EventForm } from "@/components/EventForm"
 import { EventsList } from "@/components/EventsList"
 import { Landing } from "@/components/Landing"
@@ -131,12 +132,22 @@ export default function App() {
         ) : !signedIn || DEMO_LANDING ? (
           <Landing
             onConnect={() => auth.signIn()}
+            onUseAnother={() => auth.signIn({ selectAccount: true })}
             connecting={auth.status === "signing-in"}
-            expired={auth.expired}
+            account={auth.account}
             onAbout={() => setAboutOpen(true)}
           />
         ) : (
           <div className="space-y-6">
+            {auth.sessionExpired && !DEMO && (
+              <div data-slot="session-banner" className="flex flex-wrap items-center justify-between gap-3 rounded-md border border-seal/40 bg-seal/[0.06] px-4 py-2.5" role="status">
+                <p className="text-sm">{t.session.expired}</p>
+                <Button size="sm" onClick={() => auth.signIn()}>
+                  {auth.account && <Avatar profile={auth.account} className="size-5 bg-seal ring-1 ring-primary-foreground/40" />}
+                  {auth.account ? t.session.continueAs(auth.account.name ?? auth.account.email ?? "") : t.session.reconnect}
+                </Button>
+              </div>
+            )}
             <EventForm
               // A fresh form per event being edited (or for a new event).
               key={editing ? `edit:${editing.id}` : "new"}
@@ -187,6 +198,15 @@ export default function App() {
           ·{" "}
           <a href="./terms.html" className="underline underline-offset-2 hover:text-foreground">
             {t.footer.terms}
+          </a>{" "}
+          ·{" "}
+          <a
+            href="https://github.com/yossizahn/jgcalendar"
+            target="_blank"
+            rel="noreferrer"
+            className="inline-flex items-center gap-1 underline underline-offset-2 hover:text-foreground"
+          >
+            <GithubMark /> {t.footer.source}
           </a>
         </span>
       </footer>
@@ -199,27 +219,6 @@ export default function App() {
 function Logo() {
   // Same mark as the favicon: a tear-off luach page.
   return <img src="./favicon.svg" alt="" className="size-9" />
-}
-
-function Avatar({ profile }: { profile: UserProfile }) {
-  const [failed, setFailed] = useState(false)
-  const initial = (profile.name ?? profile.email ?? "?")[0]
-  if (profile.picture && !failed)
-    return (
-      <img
-        src={profile.picture}
-        alt=""
-        // Google avatar URLs reject requests that carry a third-party referrer.
-        referrerPolicy="no-referrer"
-        onError={() => setFailed(true)}
-        className="size-7 shrink-0 rounded-full object-cover ring-1 ring-border"
-      />
-    )
-  return (
-    <span className="flex size-7 shrink-0 items-center justify-center rounded-full bg-primary text-xs font-semibold text-primary-foreground uppercase">
-      {initial}
-    </span>
-  )
 }
 
 function AboutButton({ onClick }: { onClick: () => void }) {
@@ -270,5 +269,14 @@ function ThemeMenu() {
         </DropdownMenuGroup>
       </DropdownMenuContent>
     </DropdownMenu>
+  )
+}
+
+/** GitHub's mark (Octicons, MIT). lucide-react no longer ships brand icons. */
+function GithubMark() {
+  return (
+    <svg viewBox="0 0 16 16" className="size-3" fill="currentColor" aria-hidden>
+      <path d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82.64-.18 1.32-.27 2-.27.68 0 1.36.09 2 .27 1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8.013 8.013 0 0 0 16 8c0-4.42-3.58-8-8-8Z" />
+    </svg>
   )
 }

@@ -32,6 +32,7 @@ export const en = {
     datesBy: "Hebrew dates by",
     privacy: "Privacy",
     terms: "Terms",
+    source: "Source on GitHub",
   },
 
   landing: {
@@ -39,8 +40,9 @@ export const en = {
     body:
       "Birthdays, yahrzeits, anniversaries. Google Calendar can repeat events by the Hebrew calendar, but its app has no setting for it. Pick the date here and it’s added to your calendar, landing on the right day every year.",
     connect: "Connect Google Calendar",
-    reconnect: "Reconnect Google Calendar",
-    expired: "Your Google session expired. Reconnect to continue.",
+    continueAs: (name: string) => `Continue as ${name}`,
+    useAnother: "Use another account",
+    signedInBefore: (email: string) => `Last used with ${email}.`,
     privacy: "Runs entirely in your browser, with no server. It can only see your profile, your list of calendars, and manage events.",
     howItWorks: "How does it work?",
     exampleTitle: "Grandma’s birthday",
@@ -69,6 +71,12 @@ export const en = {
         It’s saved in this browser only. To build it in instead, set {code("VITE_GOOGLE_CLIENT_ID")} in {code(".env.local")}.
       </>
     ),
+  },
+
+  session: {
+    expired: "Your Google session has ended (Google limits these to about an hour). Your changes here are kept.",
+    continueAs: (name: string) => `Continue as ${name}`,
+    reconnect: "Reconnect",
   },
 
   calendar: {

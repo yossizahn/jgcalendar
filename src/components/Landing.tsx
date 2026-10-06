@@ -3,17 +3,21 @@ import { months } from "@hebcal/hdate"
 import { ArrowRight, Loader2, Lock, Repeat } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { useDateFormat, useI18n } from "@/i18n"
+import { Avatar } from "@/components/Avatar"
+import type { UserProfile } from "@/lib/google"
 import { HDate } from "@/lib/hebrew"
 import { expand, type Occurrence, type RecurrenceSpec } from "@/lib/recurrence"
 
 interface Props {
   onConnect: () => void
   connecting: boolean
-  expired: boolean
+  /** Account used last time on this device: offer a one-click "Continue as …". */
+  account: UserProfile | null
+  onUseAnother: () => void
   onAbout: () => void
 }
 
-export function Landing({ onConnect, connecting, expired, onAbout }: Props) {
+export function Landing({ onConnect, connecting, account, onUseAnother, onAbout }: Props) {
   const { t } = useI18n()
   // Live example: 15 Shevat drifting across the Gregorian calendar.
   const thisYear = new HDate().getFullYear()
@@ -29,17 +33,30 @@ export function Landing({ onConnect, connecting, expired, onAbout }: Props) {
         <p className="max-w-prose text-lg text-pretty text-muted-foreground">
           {t.landing.body}
         </p>
-        <div className="flex flex-wrap items-center gap-4">
-          <Button size="lg" className="h-12 gap-2 rounded-md px-6 text-base" onClick={onConnect} disabled={connecting}>
-            {connecting ? <Loader2 className="animate-spin" /> : <GoogleMark />}
-            {expired ? t.landing.reconnect : t.landing.connect}
+        <div className="flex flex-wrap items-center gap-x-4 gap-y-2">
+          <Button size="lg" className="h-12 gap-2.5 rounded-md px-5 text-base" onClick={onConnect} disabled={connecting}>
+            {connecting ? <Loader2 className="animate-spin" /> : account ? <Avatar profile={account} className="size-6 bg-seal ring-2 ring-primary-foreground/40" /> : <GoogleMark />}
+            {account ? t.landing.continueAs(account.name ?? account.email ?? "") : t.landing.connect}
             {!connecting && <ArrowRight className="size-4 rtl:rotate-180" />}
           </Button>
-          <Button variant="link" className="h-11 px-1 text-sm" onClick={onAbout}>
-            {t.landing.howItWorks}
-          </Button>
+          {account ? (
+            <Button variant="link" className="h-12 px-1 text-sm" onClick={onUseAnother} disabled={connecting}>
+              {t.landing.useAnother}
+            </Button>
+          ) : (
+            <Button variant="link" className="h-12 px-1 text-sm" onClick={onAbout}>
+              {t.landing.howItWorks}
+            </Button>
+          )}
         </div>
-        {expired && <p className="text-sm text-amber-700 dark:text-amber-400">{t.landing.expired}</p>}
+        {account && (
+          <p className="-mt-3 text-sm text-muted-foreground">
+            {t.landing.signedInBefore(account.email ?? "")}{" "}
+            <button type="button" className="underline underline-offset-2 hover:text-foreground" onClick={onAbout}>
+              {t.landing.howItWorks}
+            </button>
+          </p>
+        )}
         <p className="flex max-w-prose items-start gap-2 text-sm text-muted-foreground">
           <Lock className="mt-0.5 size-3.5 shrink-0" />
           {t.landing.privacy}
