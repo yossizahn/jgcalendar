@@ -1,54 +1,53 @@
-# React + TypeScript + Vite
+# Luach: Hebrew dates for Google Calendar
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+A single-page app that adds Google Calendar events repeating on the **Hebrew date**, such as birthdays, yahrzeits and anniversaries.
 
-Currently, two official plugins are available:
+Google Calendar's API accepts RFC 7529 recurrence rules with `RSCALE=HEBREW` (e.g. `RRULE:FREQ=YEARLY;RSCALE=HEBREW`) and expands them correctly, but Google's own UI has no way to create them. This app fills that gap.
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Babel](https://babeljs.io/) for Fast Refresh
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/) for Fast Refresh
+**Live:** https://yossizahn.github.io/jgcalendar/
 
-## Expanding the ESLint configuration
+## Features
 
-If you are developing a production application, we recommend updating the configuration to enable type-aware lint rules:
+- **Dual Hebrew/Gregorian date picker**: browse by Hebrew or Gregorian months; every day shows both dates. An "after sunset" switch handles events that happened in the evening.
+- **Yearly or monthly** repetition on the Hebrew date, with an interval, and an end that is never, after N times, or on a date.
+- **Edge cases handled explicitly**: when the date doesn't exist every year (30 Cheshvan/Kislev, Adar I, day 30 in monthly mode), you choose what happens (`SKIP=BACKWARD|FORWARD|OMIT`).
+- **Edit existing events** (including `RSCALE=HEBREW` events created elsewhere, found with a scan of your calendars).
+- **Live preview** of upcoming dates, computed locally to the RFC 7529 rules, plus the exact RRULE that will be sent.
+- **Verification**: for each event the app created, Google's computed instances are compared with the expected Hebrew dates and flagged if they differ.
+- **English and Hebrew** UI (full RTL, Hebrew month names and Hebrew-numeral years in the picker), plus an **About** pane explaining the background (RFC 5545 / RFC 7529).
+- Runs entirely in the browser (Google Identity Services token flow; no backend).
 
-```js
-export default tseslint.config({
-  extends: [
-    // Remove ...tseslint.configs.recommended and replace with this
-    ...tseslint.configs.recommendedTypeChecked,
-    // Alternatively, use this for stricter rules
-    ...tseslint.configs.strictTypeChecked,
-    // Optionally, add this for stylistic rules
-    ...tseslint.configs.stylisticTypeChecked,
-  ],
-  languageOptions: {
-    // other options...
-    parserOptions: {
-      project: ['./tsconfig.node.json', './tsconfig.app.json'],
-      tsconfigRootDir: import.meta.dirname,
-    },
-  },
-})
-```
+## Setup
 
-You can also install [eslint-plugin-react-x](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-x) and [eslint-plugin-react-dom](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-dom) for React-specific lint rules:
+1. `npm install`
+2. Create a Google OAuth client ID:
+   - Enable the [Google Calendar API](https://console.cloud.google.com/apis/library/calendar-json.googleapis.com) for a project.
+   - In [Google Auth Platform](https://console.cloud.google.com/auth/overview), configure branding (audience **External**) and add yourself as a **test user**.
+   - Create a **Web application** client and add your origin (e.g. `http://localhost:5173`) to **Authorized JavaScript origins**.
+3. Either put the ID in `.env.local` as `VITE_GOOGLE_CLIENT_ID=…` (see `.env.example`), or paste it into the app on first run (stored in localStorage).
+4. `npm run dev`
 
-```js
-// eslint.config.js
-import reactX from 'eslint-plugin-react-x'
-import reactDom from 'eslint-plugin-react-dom'
+Scopes requested: `calendar.calendarlist.readonly` (to pick a calendar), `calendar.events` (to create and delete events), and `email profile` (name and avatar in the header; optional).
 
-export default tseslint.config({
-  plugins: {
-    // Add the react-x and react-dom plugins
-    'react-x': reactX,
-    'react-dom': reactDom,
-  },
-  rules: {
-    // other rules...
-    // Enable its recommended typescript rules
-    ...reactX.configs['recommended-typescript'].rules,
-    ...reactDom.configs.recommended.rules,
-  },
-})
-```
+## Development
+
+| Command | |
+|---|---|
+| `npm run dev` | Dev server. Open `/?demo` to see the signed-in UI with fake calendars (dev only). |
+| `npm test` | Unit tests (Vitest): recurrence engine and Hebrew date library |
+| `npm run build` | Type-check and production build |
+| `npm run lint` | oxlint |
+
+Stack: React 19, TypeScript, Vite 8, Tailwind CSS 4, shadcn/ui (Base UI), react-day-picker 10, @hebcal/hdate.
+
+## How it works
+
+- `src/lib/recurrence.ts` builds the RRULE (`FREQ` first, as RFC 5545 requires), detects dates that need `SKIP`, and expands occurrences using RFC 7529 semantics (month numbering: Tishrei = 1 … Adar I = `5L`, Adar/Adar II = `6` … Elul = 12).
+- `src/lib/hebrewDateLib.ts` gives react-day-picker a Hebrew-calendar `DateLib` backed by hebcal, so the picker's grid, navigation and dropdowns follow Hebrew months. (`@daypicker/hebrew` was evaluated but its month arithmetic is wrong for most months and it throws on some valid dates.)
+- `src/lib/google.ts` handles the GIS token client and a minimal Calendar v3 REST client. Created events are tagged with a private extended property so the app can list them later.
+
+**Note:** don't edit the *repeat* settings of these events in Google Calendar's UI. It can't represent Hebrew rules and will replace them. Editing the title, time or description is fine.
+
+## Deployment
+
+Pushing to `main` runs `.github/workflows/deploy.yml`: lint, tests, build (with `base: /jgcalendar/`), then deploy to GitHub Pages. To build the OAuth client ID in, set a repository **variable** `VITE_GOOGLE_CLIENT_ID`; otherwise the site asks for one on first run. Either way, add `https://yossizahn.github.io` to the client's **Authorized JavaScript origins**.
