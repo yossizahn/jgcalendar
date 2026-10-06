@@ -23,8 +23,13 @@ import { type Theme, useTheme } from "@/hooks/useTheme"
 import { useI18n } from "@/i18n"
 import { clientIdFromEnv, type GCalendar, getClientId, setClientId, type UserProfile } from "@/lib/google"
 
-/** Dev-only: `?demo` renders the signed-in UI with fake calendars, for working on the UI without OAuth. */
-const DEMO = import.meta.env.DEV && new URLSearchParams(location.search).has("demo")
+/**
+ * Dev-only previews without OAuth: `?demo` renders the signed-in UI with fake calendars,
+ * `?demo=landing` the signed-out landing page.
+ */
+const DEMO_PARAM = import.meta.env.DEV ? new URLSearchParams(location.search).get("demo") : null
+const DEMO_LANDING = DEMO_PARAM === "landing"
+const DEMO = DEMO_PARAM !== null && !DEMO_LANDING
 const DEMO_CALENDARS: GCalendar[] = [
   { id: "you@example.com", summary: "you@example.com", primary: true, backgroundColor: "#4285f4", accessRole: "owner" },
   { id: "family", summary: "Family", backgroundColor: "#33b679", accessRole: "writer" },
@@ -116,14 +121,14 @@ export default function App() {
       </header>
 
       <main className="mx-auto w-full max-w-6xl flex-1 px-4 py-6">
-        {!clientId && !DEMO ? (
+        {!clientId && !DEMO && !DEMO_LANDING ? (
           <SetupClientId
             onSave={(id) => {
               setClientId(id)
               setClientIdState(id)
             }}
           />
-        ) : !signedIn ? (
+        ) : !signedIn || DEMO_LANDING ? (
           <Landing
             onConnect={() => auth.signIn()}
             connecting={auth.status === "signing-in"}
