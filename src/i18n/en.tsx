@@ -42,7 +42,7 @@ export const en = {
     connect: "Connect Google Calendar",
     continueAs: (name: string) => `Continue as ${name}`,
     useAnother: "Use another account",
-    signedInBefore: (email: string) => `Last used with ${email}.`,
+    signedInBefore: (email: ReactNode) => <>Last used with {email}.</>,
     privacy: "Runs entirely in your browser, with no server. It can only see your profile, your list of calendars, and manage events.",
     howItWorks: "How does it work?",
     exampleTitle: "Grandma’s birthday",

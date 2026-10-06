@@ -49,18 +49,16 @@ export function Landing({ onConnect, connecting, account, onUseAnother, onAbout 
             </Button>
           )}
         </div>
-        {account && (
-          <p className="-mt-3 text-sm text-muted-foreground">
-            {t.landing.signedInBefore(account.email ?? "")}{" "}
-            <button type="button" className="underline underline-offset-2 hover:text-foreground" onClick={onAbout}>
-              {t.landing.howItWorks}
-            </button>
-          </p>
-        )}
+        {account && <p className="-mt-3 text-sm text-muted-foreground">{t.landing.signedInBefore(<bdi>{account.email}</bdi>)}</p>}
         <p className="flex max-w-prose items-start gap-2 text-sm text-muted-foreground">
           <Lock className="mt-0.5 size-3.5 shrink-0" />
           {t.landing.privacy}
         </p>
+        {account && (
+          <Button variant="link" className="h-auto px-0 text-sm" onClick={onAbout}>
+            {t.landing.howItWorks}
+          </Button>
+        )}
       </div>
 
       <div className="relative">

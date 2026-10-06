@@ -46,7 +46,7 @@ export const he: Messages = {
     connect: "חיבור ליומן Google",
     continueAs: (name) => `המשך בתור ${name}`,
     useAnother: "חשבון אחר",
-    signedInBefore: (email) => `בפעם הקודמת התחברתם עם ${email}.`,
+    signedInBefore: (email) => <>בפעם הקודמת התחברתם עם {email}.</>,
     privacy: "פועל כולו בדפדפן, ללא שרת. יש לו גישה רק לפרופיל שלכם, לרשימת היומנים ולניהול אירועים.",
     howItWorks: "איך זה עובד?",
     exampleTitle: "יום ההולדת של סבתא",
