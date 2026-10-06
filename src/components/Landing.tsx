@@ -1,3 +1,4 @@
+import { cn } from "cn"
 import { months } from "@hebcal/hdate"
 import { ArrowRight, Loader2, Lock, Repeat } from "lucide-react"
 import { Button } from "@/components/ui/button"
@@ -77,13 +78,16 @@ function DriftChart({ occurrences }: { occurrences: Occurrence[] }) {
   const TOP = 8
   const LEFT = 44
   const WIDTH = 340
+  /** The dates sit in their own right-hand column, so the line can never run through them. */
+  const LABELS = 52
+  const PLOT_RIGHT = WIDTH - LABELS - 10
   const START = { m: 0, d: 12 } // Jan 12
   const SPAN = 38 // days shown (to ~Feb 19)
   const height = TOP + occurrences.length * ROW + 22
   const x = (date: Date) => {
     const start = new Date(date.getFullYear(), START.m, START.d)
     const days = (date.getTime() - start.getTime()) / 86_400_000
-    return LEFT + (days / SPAN) * (WIDTH - LEFT - 8)
+    return LEFT + (days / SPAN) * (PLOT_RIGHT - LEFT)
   }
   const ticks = [new Date(2000, 0, 15), new Date(2000, 1, 1), new Date(2000, 1, 15)]
   const points = occurrences.map((o, i) => [x(o.date), TOP + i * ROW + ROW / 2] as const)
@@ -106,8 +110,16 @@ function DriftChart({ occurrences }: { occurrences: Occurrence[] }) {
             <text x={4} y={cy + 3} className="fill-muted-foreground text-[9px] tabular-nums">
               {o.date.getFullYear()}
             </text>
+            <line x1={cx} x2={WIDTH - LABELS} y1={cy} y2={cy} className="stroke-border" strokeDasharray="1 3" />
             <circle cx={cx} cy={cy} r={i === 0 ? 5 : 4} className={i === 0 ? "fill-seal" : "fill-primary"} />
-            <text x={cx + 9} y={cy + 3} className="fill-foreground text-[9px] font-medium" direction={lang === "he" ? "rtl" : "ltr"} textAnchor="start">
+            <text
+              x={WIDTH - 2}
+              y={cy + 3}
+              // text-anchor follows the text direction: "end" is the right edge in LTR, "start" in RTL.
+              textAnchor={lang === "he" ? "start" : "end"}
+              direction={lang === "he" ? "rtl" : "ltr"}
+              className={cn("text-[9px] font-medium tabular-nums", i === 0 ? "fill-seal" : "fill-foreground")}
+            >
               {dayMonth.format(o.date)}
             </text>
           </g>
