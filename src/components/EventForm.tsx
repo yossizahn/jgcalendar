@@ -175,7 +175,7 @@ export function EventForm({ calendars, onCreated, onError, editing, onSaved, onC
         reminder,
         extraRecurrence: initial?.extraRecurrence,
       }
-      const body = buildEventBody(draft)
+      const body = buildEventBody(draft, { patch: Boolean(editing) })
 
       if (editing) {
         // Changing the calendar is a move, then the regular update.

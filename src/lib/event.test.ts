@@ -57,4 +57,15 @@ describe("formValuesFromEvent", () => {
     const v = formValuesFromEvent(base)!
     expect(buildEventBody({ ...v, calendarId: "c", reminder: "keep" }).reminders).toBeUndefined()
   })
+
+  it("clears the other kind of time when patching all-day ↔ timed", () => {
+    const v = formValuesFromEvent(base)!
+    const timed = buildEventBody({ ...v, calendarId: "c", allDay: false, startTime: "09:00", endTime: "10:00", timeZone: "Asia/Jerusalem" }, { patch: true })
+    expect(timed.start).toEqual({ dateTime: "2026-02-02T09:00:00", timeZone: "Asia/Jerusalem", date: null })
+    expect(timed.end).toEqual({ dateTime: "2026-02-02T10:00:00", timeZone: "Asia/Jerusalem", date: null })
+    const allDay = buildEventBody({ ...v, calendarId: "c", allDay: true }, { patch: true })
+    expect(allDay.start).toEqual({ date: "2026-02-02", dateTime: null, timeZone: null })
+    // Inserts stay free of nulls.
+    expect(buildEventBody({ ...v, calendarId: "c" }).start).toEqual({ date: "2026-02-02" })
+  })
 })

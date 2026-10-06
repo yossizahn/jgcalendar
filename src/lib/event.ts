@@ -25,7 +25,11 @@ export const ymd = (d: Date) => `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${p
 
 const addDays = (d: Date, n: number) => new Date(d.getFullYear(), d.getMonth(), d.getDate() + n)
 
-export function buildEventBody(draft: EventDraft): Partial<GEvent> {
+/**
+ * Event body for insert, or for PATCH with `{ patch: true }`. PATCH merges into the existing start/end,
+ * so switching between all-day and timed must explicitly null the other kind of time.
+ */
+export function buildEventBody(draft: EventDraft, opts: { patch?: boolean } = {}): Partial<GEvent> {
   const startDay = draft.spec.start.greg()
   const rrule = buildRRule(draft.spec, { allDay: draft.allDay })
 
@@ -34,10 +38,18 @@ export function buildEventBody(draft: EventDraft): Partial<GEvent> {
   if (draft.allDay) {
     start = { date: ymd(startDay) }
     end = { date: ymd(addDays(startDay, 1)) }
+    if (opts.patch) {
+      start = { ...start, dateTime: null, timeZone: null }
+      end = { ...end, dateTime: null, timeZone: null }
+    }
   } else {
     const endsNextDay = draft.endTime <= draft.startTime
     start = { dateTime: `${ymd(startDay)}T${draft.startTime}:00`, timeZone: draft.timeZone }
     end = { dateTime: `${ymd(endsNextDay ? addDays(startDay, 1) : startDay)}T${draft.endTime}:00`, timeZone: draft.timeZone }
+    if (opts.patch) {
+      start = { ...start, date: null }
+      end = { ...end, date: null }
+    }
   }
 
   const reminders: GEvent["reminders"] | undefined =

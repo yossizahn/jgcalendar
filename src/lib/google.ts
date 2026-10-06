@@ -203,9 +203,10 @@ export interface GCalendar {
 }
 
 export interface GEventTime {
-  date?: string
-  dateTime?: string
-  timeZone?: string
+  /** `null` only in PATCH bodies, to clear the field. */
+  date?: string | null
+  dateTime?: string | null
+  timeZone?: string | null
 }
 
 export interface GEvent {
