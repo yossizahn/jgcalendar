@@ -13,7 +13,8 @@
           document.documentElement.classList.add("dark")
         // Avoid a left-to-right flash before React applies the saved language.
         var l = localStorage.getItem("lang")
-        if (l === "he" || (!l && navigator.languages.some(function (x) { return /^(he|iw)\b/i.test(x) }))) {
+        var first = navigator.languages.find(function (x) { return /^(en|he|iw)\b/i.test(x) })
+        if (l === "he" || (!l && first && /^(he|iw)\b/i.test(first))) {
           document.documentElement.lang = "he"
           document.documentElement.dir = "rtl"
         }

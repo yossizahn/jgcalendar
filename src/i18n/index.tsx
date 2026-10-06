@@ -15,7 +15,9 @@ function initialLang(): Lang {
   } catch {
     /* storage unavailable */
   }
-  return navigator.languages.some((l) => /^(he|iw)\b/i.test(l)) ? "he" : "en"
+  // Respect the user's preference order: the first of English/Hebrew wins.
+  const first = navigator.languages.find((l) => /^(en|he|iw)\b/i.test(l))
+  return first && /^(he|iw)\b/i.test(first) ? "he" : "en"
 }
 
 /** BCP 47 tag for Intl formatting: Hebrew, or the user's own English variant (en-GB, en-US…). */
