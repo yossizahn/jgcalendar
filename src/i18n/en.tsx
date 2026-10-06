@@ -42,7 +42,7 @@ export const en = {
     reconnect: "Reconnect Google Calendar",
     expired: "Your Google session expired. Reconnect to continue.",
     privacy: "Runs entirely in your browser, with no server. It can only see your profile, your list of calendars, and manage events.",
-    howItWorks: "Why is this needed? Read the background",
+    howItWorks: "How does it work?",
     exampleTitle: "Grandma’s birthday",
     exampleNote: "The Gregorian date moves every year. With a normal yearly repeat, Google would keep it on the same Gregorian date.",
   },
