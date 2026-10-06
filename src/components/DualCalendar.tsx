@@ -1,5 +1,6 @@
 import { gematriya } from "@hebcal/hdate"
 import { cn } from "cn"
+import { LocateFixed } from "lucide-react"
 import { useMemo, useState } from "react"
 import type { DayButtonProps, DayPickerProps } from "react-day-picker"
 import { he as heLocale } from "react-day-picker/locale"
@@ -72,6 +73,17 @@ export function DualCalendar({ selected, onSelect, mode, onModeChange }: Props) 
   const gregMonthShort = useDateFormat({ month: "short" })
   const hebrewDateLib = useMemo(() => createHebrewDateLib(lang), [lang])
 
+  /** Whether two dates fall in the same month of the grid currently shown (Hebrew or Gregorian). */
+  const sameMonth = (a: Date, b: Date) =>
+    mode === "hebrew" ? hebrewDateLib.isSameMonth!(a, b) : a.getFullYear() === b.getFullYear() && a.getMonth() === b.getMonth()
+
+  const selectToday = () => {
+    const now = new Date()
+    const today = new Date(now.getFullYear(), now.getMonth(), now.getDate())
+    setMonth(today)
+    onSelect(today)
+  }
+
   // Stable component identity, so day buttons aren't remounted on every render.
   const DayButton = useMemo(
     () => (p: DayButtonProps) => <DualDayButton {...p} mode={mode} lang={lang} gregMonthShort={gregMonthShort} />,
@@ -120,9 +132,16 @@ export function DualCalendar({ selected, onSelect, mode, onModeChange }: Props) 
             { value: "gregorian", label: <>{t.calendar.gregorian}<span className="max-sm:hidden">{t.calendar.monthsSuffix}</span></> },
           ]}
         />
-        <Button variant="ghost" size="sm" onClick={() => setMonth(selected ?? new Date())}>
-          {selected ? t.calendar.goToSelected : t.calendar.today}
-        </Button>
+        <div className="flex items-center gap-1">
+          {selected && !sameMonth(selected, month) && (
+            <Button variant="ghost" size="icon-sm" onClick={() => setMonth(selected)} aria-label={t.calendar.goToSelected} title={t.calendar.goToSelected}>
+              <LocateFixed />
+            </Button>
+          )}
+          <Button variant="outline" size="sm" onClick={selectToday}>
+            {t.calendar.today}
+          </Button>
+        </div>
       </div>
 
       {mode === "hebrew" ? (
