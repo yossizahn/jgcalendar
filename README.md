@@ -52,4 +52,6 @@ Stack: React 19, TypeScript, Vite 8, Tailwind CSS 4, shadcn/ui (Base UI), react-
 
 Pushing to `main` runs `.github/workflows/deploy.yml`: lint, tests, build, then deploy to GitHub Pages. The build uses relative asset paths (`base: "./"`), so it works both at the custom domain's root and under `/jgcalendar/`; `public/jgcalendar/index.html` redirects the old path on the custom domain to the root.
 
-To build the OAuth client ID in, set a repository **variable** `VITE_GOOGLE_CLIENT_ID`; otherwise the site asks for one on first run. Add every origin the site is served from (`https://luach.yossizahn.tech`, `https://yossizahn.github.io`) to the client's **Authorized JavaScript origins**.
+To build the OAuth client ID in, set a repository **variable** `VITE_GOOGLE_CLIENT_ID`; otherwise the site asks for one on first run. Privacy policy and terms (for Google's consent-screen branding) are static pages in `public/`: `privacy.html` and `terms.html`, in English and Hebrew.
+
+Add every origin the site is served from (`https://luach.yossizahn.tech`, `https://yossizahn.github.io`) to the client's **Authorized JavaScript origins**.

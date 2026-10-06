@@ -175,6 +175,15 @@ export default function App() {
         <a href="https://github.com/hebcal/hdate" className="underline underline-offset-2 hover:text-foreground" target="_blank" rel="noreferrer">
           @hebcal/hdate
         </a>
+        <span className="mt-2 block">
+          <a href="./privacy.html" className="underline underline-offset-2 hover:text-foreground">
+            {t.footer.privacy}
+          </a>{" "}
+          ·{" "}
+          <a href="./terms.html" className="underline underline-offset-2 hover:text-foreground">
+            {t.footer.terms}
+          </a>
+        </span>
       </footer>
 
       <About open={aboutOpen} onOpenChange={setAboutOpen} />

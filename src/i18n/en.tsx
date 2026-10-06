@@ -30,6 +30,8 @@ export const en = {
   footer: {
     uses: "Uses ",
     datesBy: "Hebrew dates by",
+    privacy: "Privacy",
+    terms: "Terms",
   },
 
   landing: {

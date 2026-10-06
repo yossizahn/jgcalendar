@@ -1,0 +1,41 @@
+/* Styles for the standalone legal pages (privacy.html, terms.html). Colors mirror the app's theme tokens. */
+:root {
+  --bg: oklch(0.985 0.004 262);
+  --fg: oklch(0.145 0 0);
+  --muted: oklch(0.45 0 0);
+  --primary: oklch(0.48 0.17 262);
+  --border: oklch(0.922 0 0);
+  --code-bg: oklch(0.96 0.004 262);
+  color-scheme: light;
+}
+:root.dark {
+  --bg: oklch(0.145 0 0);
+  --fg: oklch(0.985 0 0);
+  --muted: oklch(0.72 0 0);
+  --primary: oklch(0.72 0.13 262);
+  --border: oklch(1 0 0 / 12%);
+  --code-bg: oklch(0.24 0 0);
+  color-scheme: dark;
+}
+* { box-sizing: border-box; }
+body {
+  margin: 0;
+  background: var(--bg);
+  color: var(--fg);
+  font: 16px/1.65 system-ui, -apple-system, "Segoe UI", Roboto, "Heebo", "Arial Hebrew", sans-serif;
+}
+main { max-width: 44rem; margin: 0 auto; padding: 2.5rem 1rem 4rem; }
+h1 { font-size: 1.9rem; line-height: 1.2; margin: 1.5rem 0 0.25rem; letter-spacing: -0.01em; }
+h2 { font-size: 1.1rem; margin: 2rem 0 0.5rem; }
+p, li { color: var(--muted); }
+strong { color: var(--fg); }
+ul { padding-inline-start: 1.25rem; }
+li + li { margin-top: 0.4rem; }
+a { color: var(--primary); text-underline-offset: 3px; }
+code { font: 0.85em ui-monospace, SFMono-Regular, Menlo, monospace; background: var(--code-bg); padding: 0.1em 0.35em; border-radius: 4px; }
+.meta { font-size: 0.9rem; border-bottom: 1px solid var(--border); padding-bottom: 1rem; }
+.back { font-size: 0.9rem; text-decoration: none; }
+.back:hover { text-decoration: underline; }
+/* Show one language at a time (set by legal.js); both show if scripts are off. */
+html[data-lang="en"] article[lang="he"],
+html[data-lang="he"] article[lang="en"] { display: none; }

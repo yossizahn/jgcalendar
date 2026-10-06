@@ -34,6 +34,8 @@ export const he: Messages = {
   footer: {
     uses: "משתמש ב־",
     datesBy: "תאריכים עבריים באמצעות",
+    privacy: "פרטיות",
+    terms: "תנאי שימוש",
   },
 
   landing: {
