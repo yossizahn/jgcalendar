@@ -3,11 +3,16 @@
 @import "shadcn/tailwind.css";
 @import "@fontsource-variable/geist";
 @import "@fontsource-variable/heebo";
+@import "@fontsource-variable/frank-ruhl-libre";
 
 @custom-variant dark (&:is(.dark *));
 
 @theme inline {
     --font-heading: var(--font-sans);
+    /* Serif display face with Hebrew + Latin, for headings and big dates. */
+    --font-display: 'Frank Ruhl Libre Variable', 'Frank Ruhl Libre', serif;
+    --color-gold: var(--gold);
+    --color-gold-foreground: var(--gold-foreground);
     /* Geist has no Hebrew glyphs, so Hebrew text falls through to Heebo everywhere. */
     --font-sans: 'Geist Variable', 'Heebo Variable', sans-serif;
     --color-sidebar-ring: var(--sidebar-ring);
@@ -51,7 +56,9 @@
 }
 
 :root {
-    --background: oklch(0.985 0.004 262);
+    --background: oklch(0.982 0.008 255);
+    --gold: oklch(0.78 0.14 78);
+    --gold-foreground: oklch(0.36 0.08 70);
     --foreground: oklch(0.145 0 0);
     --card: oklch(1 0 0);
     --card-foreground: oklch(0.145 0 0);
@@ -61,12 +68,12 @@
     --primary-foreground: oklch(0.985 0 0);
     --secondary: oklch(0.97 0 0);
     --secondary-foreground: oklch(0.205 0 0);
-    --muted: oklch(0.97 0 0);
+    --muted: oklch(0.955 0.01 262);
     --muted-foreground: oklch(0.556 0 0);
     --accent: oklch(0.97 0 0);
     --accent-foreground: oklch(0.205 0 0);
     --destructive: oklch(0.577 0.245 27.325);
-    --border: oklch(0.922 0 0);
+    --border: oklch(0.91 0.012 262);
     --input: oklch(0.922 0 0);
     --ring: oklch(0.62 0.14 262);
     --chart-1: oklch(0.87 0 0);
@@ -86,19 +93,21 @@
 }
 
 .dark {
-    --background: oklch(0.145 0 0);
+    --background: oklch(0.16 0.025 265);
+    --gold: oklch(0.82 0.13 82);
+    --gold-foreground: oklch(0.88 0.1 85);
     --foreground: oklch(0.985 0 0);
-    --card: oklch(0.205 0 0);
+    --card: oklch(0.205 0.028 265);
     --card-foreground: oklch(0.985 0 0);
-    --popover: oklch(0.205 0 0);
+    --popover: oklch(0.22 0.028 265);
     --popover-foreground: oklch(0.985 0 0);
     --primary: oklch(0.72 0.13 262);
     --primary-foreground: oklch(0.18 0.03 262);
-    --secondary: oklch(0.269 0 0);
+    --secondary: oklch(0.27 0.03 265);
     --secondary-foreground: oklch(0.985 0 0);
-    --muted: oklch(0.269 0 0);
+    --muted: oklch(0.27 0.03 265);
     --muted-foreground: oklch(0.708 0 0);
-    --accent: oklch(0.269 0 0);
+    --accent: oklch(0.27 0.03 265);
     --accent-foreground: oklch(0.985 0 0);
     --destructive: oklch(0.704 0.191 22.216);
     --border: oklch(1 0 0 / 10%);
@@ -125,6 +134,11 @@
     }
   body {
     @apply bg-background text-foreground;
+    /* Soft blue and gold glows behind the page. */
+    background-image:
+      radial-gradient(55rem 28rem at 100% -8rem, color-mix(in oklch, var(--primary) 16%, transparent), transparent 70%),
+      radial-gradient(40rem 22rem at -10% -6rem, color-mix(in oklch, var(--gold) 18%, transparent), transparent 70%);
+    background-repeat: no-repeat;
     }
   html {
     @apply font-sans;

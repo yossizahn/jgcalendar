@@ -2,8 +2,8 @@ import { months } from "@hebcal/hdate"
 import { ArrowRight, Loader2, Lock, Repeat } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { useDateFormat, useI18n } from "@/i18n"
-import { HDate, formatHebrew } from "@/lib/hebrew"
-import { expand, type RecurrenceSpec } from "@/lib/recurrence"
+import { HDate } from "@/lib/hebrew"
+import { expand, type Occurrence, type RecurrenceSpec } from "@/lib/recurrence"
 
 interface Props {
   onConnect: () => void
@@ -13,24 +13,23 @@ interface Props {
 }
 
 export function Landing({ onConnect, connecting, expired, onAbout }: Props) {
-  const { t, lang } = useI18n()
-  const fmt = useDateFormat({ month: "short", day: "numeric", year: "numeric" })
+  const { t } = useI18n()
   // Live example: 15 Shevat drifting across the Gregorian calendar.
   const thisYear = new HDate().getFullYear()
   const exampleSpec: RecurrenceSpec = { start: new HDate(15, months.SHVAT, thisYear), freq: "YEARLY", interval: 1, skip: "OMIT", end: { type: "never" } }
-  const example = expand(exampleSpec, 4)
+  const example = expand(exampleSpec, 10)
 
   return (
     <div className="mx-auto grid max-w-5xl items-center gap-12 py-10 md:grid-cols-[1.1fr_1fr] md:py-20">
       <div className="space-y-6">
-        <h1 className="text-4xl leading-[1.1] font-semibold tracking-tight text-balance sm:text-5xl">
+        <h1 className="font-display text-4xl leading-[1.05] font-semibold tracking-tight text-balance sm:text-6xl">
           {t.landing.title((s) => <span className="text-primary">{s}</span>)}
         </h1>
         <p className="max-w-prose text-lg text-pretty text-muted-foreground">
           {t.landing.body}
         </p>
         <div className="flex flex-wrap items-center gap-4">
-          <Button size="lg" className="h-11 gap-2 px-5 text-base" onClick={onConnect} disabled={connecting}>
+          <Button size="lg" className="h-12 gap-2 bg-gradient-to-br from-primary to-[oklch(0.45_0.19_285)] px-6 text-base shadow-lg shadow-primary/25 hover:brightness-110 dark:to-[oklch(0.66_0.15_285)]" onClick={onConnect} disabled={connecting}>
             {connecting ? <Loader2 className="animate-spin" /> : <GoogleMark />}
             {expired ? t.landing.reconnect : t.landing.connect}
             {!connecting && <ArrowRight className="size-4 rtl:rotate-180" />}
@@ -47,33 +46,75 @@ export function Landing({ onConnect, connecting, expired, onAbout }: Props) {
       </div>
 
       <div className="relative">
-        <div className="absolute -inset-6 -z-10 rounded-[2rem] bg-gradient-to-br from-primary/15 via-primary/5 to-transparent blur-2xl" />
-        <div className="rounded-2xl border bg-card p-5 shadow-xl shadow-primary/5">
-          <div className="flex items-center justify-between">
+        <div className="absolute -inset-8 -z-10 rounded-[2.5rem] bg-gradient-to-br from-primary/20 via-gold/10 to-transparent blur-3xl" />
+        <div className="rounded-2xl border bg-card/90 p-5 shadow-xl shadow-primary/10 backdrop-blur">
+          <div className="flex items-start justify-between gap-3">
             <div>
               <p className="font-semibold">{t.landing.exampleTitle}</p>
               <p className="flex items-center gap-1.5 text-sm text-primary">
                 <Repeat className="size-3.5" /> {t.describe(exampleSpec)}
               </p>
             </div>
-            <span dir="rtl" lang="he" className="text-2xl font-medium text-primary/80">
+            <span dir="rtl" lang="he" className="font-display text-3xl font-semibold text-primary">
               ט״ו בשבט
             </span>
           </div>
-          <ol className="mt-4 divide-y rounded-lg border">
-            {example.map((o) => (
-              <li key={o.date.toISOString()} className="flex items-center justify-between px-3 py-2.5 text-sm">
-                <span className="font-medium tabular-nums">{fmt.format(o.date)}</span>
-                <span className="text-muted-foreground">{formatHebrew(o.hdate, { lang })}</span>
-              </li>
-            ))}
-          </ol>
-          <p className="mt-3 text-xs text-muted-foreground">
-            {t.landing.exampleNote}
-          </p>
+          <DriftChart occurrences={example} />
+          <p className="mt-3 text-xs text-muted-foreground">{t.landing.exampleNote}</p>
         </div>
       </div>
     </div>
+  )
+}
+
+/**
+ * One Hebrew date over ten years, plotted on a Jan–Feb axis: shows how the Gregorian date wanders.
+ * Always laid out left-to-right (time axis), also in Hebrew.
+ */
+function DriftChart({ occurrences }: { occurrences: Occurrence[] }) {
+  const { lang } = useI18n()
+  const dayMonth = useDateFormat({ day: "numeric", month: "short" })
+  const ROW = 24
+  const TOP = 8
+  const LEFT = 44
+  const WIDTH = 340
+  const START = { m: 0, d: 12 } // Jan 12
+  const SPAN = 38 // days shown (to ~Feb 19)
+  const height = TOP + occurrences.length * ROW + 22
+  const x = (date: Date) => {
+    const start = new Date(date.getFullYear(), START.m, START.d)
+    const days = (date.getTime() - start.getTime()) / 86_400_000
+    return LEFT + (days / SPAN) * (WIDTH - LEFT - 8)
+  }
+  const ticks = [new Date(2000, 0, 15), new Date(2000, 1, 1), new Date(2000, 1, 15)]
+  const points = occurrences.map((o, i) => [x(o.date), TOP + i * ROW + ROW / 2] as const)
+
+  return (
+    <svg style={{ direction: "ltr" }} viewBox={`0 0 ${WIDTH} ${height}`} className="mt-4 w-full" role="img" aria-label={occurrences.map((o) => dayMonth.format(o.date)).join(", ")}>
+      {ticks.map((d) => (
+        <g key={d.toISOString()}>
+          <line x1={x(d)} x2={x(d)} y1={TOP - 4} y2={height - 18} className="stroke-border" strokeDasharray="2 3" />
+          <text x={x(d)} y={height - 4} textAnchor="middle" className="fill-muted-foreground text-[9px]">
+            {dayMonth.format(d)}
+          </text>
+        </g>
+      ))}
+      <polyline points={points.map((p) => p.join(",")).join(" ")} fill="none" className="stroke-primary/35" strokeWidth={1.5} strokeLinejoin="round" />
+      {occurrences.map((o, i) => {
+        const [cx, cy] = points[i]
+        return (
+          <g key={o.date.toISOString()}>
+            <text x={4} y={cy + 3} className="fill-muted-foreground text-[9px] tabular-nums">
+              {o.date.getFullYear()}
+            </text>
+            <circle cx={cx} cy={cy} r={i === 0 ? 5.5 : 4.5} className={i === 0 ? "fill-gold" : "fill-primary"} />
+            <text x={cx + 9} y={cy + 3} className="fill-foreground text-[9px] font-medium" direction={lang === "he" ? "rtl" : "ltr"} textAnchor="start">
+              {dayMonth.format(o.date)}
+            </text>
+          </g>
+        )
+      })}
+    </svg>
   )
 }
 

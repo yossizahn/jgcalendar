@@ -61,12 +61,12 @@ export default function App() {
 
   return (
     <div className="flex min-h-svh flex-col">
-      <header className="sticky top-0 z-20 border-b bg-background/80 backdrop-blur">
+      <header className="sticky top-0 z-20 border-b border-border/60 bg-background/70 backdrop-blur-lg">
         <div className="mx-auto flex h-14 max-w-6xl items-center justify-between gap-4 px-4">
           <div className="flex items-center gap-2.5">
             <Logo />
             <div className="leading-tight">
-              <p className="font-semibold tracking-tight">{t.app.name}</p>
+              <p className="font-display text-lg leading-none font-semibold tracking-tight">{t.app.name}</p>
               <p className="hidden text-xs text-muted-foreground sm:block">{t.app.tagline}</p>
             </div>
           </div>
@@ -193,8 +193,8 @@ export default function App() {
 
 function Logo() {
   return (
-    <div className="relative flex size-8 items-center justify-center rounded-lg bg-primary text-primary-foreground shadow-sm">
-      <span lang="he" className="text-lg leading-none font-semibold">
+    <div className="relative flex size-9 items-center justify-center rounded-xl bg-gradient-to-br from-primary to-[oklch(0.42_0.19_285)] shadow-md shadow-primary/30 ring-1 ring-white/20">
+      <span lang="he" className="font-display text-xl leading-none font-bold text-gold">
         א
       </span>
     </div>

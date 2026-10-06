@@ -91,13 +91,17 @@ export function DualCalendar({ selected, onSelect, mode, onModeChange }: Props) 
     fixedWeeks: true,
     dir,
     locale: lang === "he" ? heLocale : undefined,
-    className: "w-full bg-transparent p-0 [--cell-size:--spacing(11)]",
-    classNames: { root: "w-full" },
+    className: "w-full bg-transparent p-0 [--cell-radius:var(--radius-lg)] [--cell-size:--spacing(11)] sm:[--cell-size:--spacing(12)]",
+    classNames: {
+      root: "w-full",
+      // Today: a gold ring instead of the default grey fill.
+      today: "rounded-(--cell-radius) text-foreground [&>button]:ring-2 [&>button]:ring-gold/70 [&>button]:ring-inset",
+    },
     components: { DayButton },
   }
 
   return (
-    <div className="w-full max-w-[22rem] shrink-0 space-y-3">
+    <div className="w-full max-w-[24rem] shrink-0 space-y-3">
       <div className="flex items-center justify-between gap-2">
         <Segmented
           aria-label={t.calendar.gridAria}

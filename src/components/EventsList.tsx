@@ -1,5 +1,5 @@
 import { cn } from "cn"
-import { CalendarDays, CircleCheck, ExternalLink, Loader2, PencilLine, RefreshCw, Search, Trash2, TriangleAlert } from "lucide-react"
+import { CalendarDays, CircleCheck, ExternalLink, Info, Loader2, MoreHorizontal, PencilLine, RefreshCw, Search, Trash2, TriangleAlert } from "lucide-react"
 import { useEffect, useState } from "react"
 import { toast } from "sonner"
 import {
@@ -11,10 +11,9 @@ import {
   AlertDialogFooter,
   AlertDialogHeader,
   AlertDialogTitle,
-  AlertDialogTrigger,
 } from "@/components/ui/alert-dialog"
 import { Button } from "@/components/ui/button"
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu"
 import { Skeleton } from "@/components/ui/skeleton"
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip"
 import type { AppEvent } from "@/hooks/useGoogle"
@@ -56,50 +55,55 @@ export function EventsList({ events, calendars, onDeleted, onRefresh, onError, o
   }
 
   return (
-    <Card>
-      <CardHeader className="flex flex-row items-start justify-between gap-4">
-        <div className="space-y-1.5">
-          <CardTitle className="text-lg">{t.events.title}</CardTitle>
-          <CardDescription>{t.events.description}</CardDescription>
+    <section className="space-y-4">
+      <div className="flex flex-wrap items-end justify-between gap-3">
+        <div>
+          <h2 className="font-display text-2xl font-semibold">{t.events.title}</h2>
+          <p className="text-sm text-muted-foreground">{t.events.subtitle}</p>
         </div>
-        <Button variant="ghost" size="icon-sm" onClick={onRefresh} aria-label={t.events.refresh}>
-          <RefreshCw />
-        </Button>
-      </CardHeader>
-      <CardContent className="space-y-3">
-        {events === null ? (
-          <div className="space-y-2">
-            {[0, 1].map((i) => (
-              <Skeleton key={i} className="h-16 w-full" />
-            ))}
-          </div>
-        ) : events.length === 0 ? (
-          <div className="flex flex-col items-center gap-2 rounded-lg border border-dashed px-4 py-8 text-center text-sm text-muted-foreground">
-            <CalendarDays className="size-7 opacity-40" />
-            {t.events.empty}
-          </div>
-        ) : (
-          <ul className="divide-y rounded-lg border">
-            {events.map((e) => (
-              <EventRow
-                // Remount after an edit so verification re-runs against the new rule.
-                key={`${e.id}:${e.etag ?? ""}`}
-                event={e}
-                calendar={calendars?.find((c) => c.id === e.calendarId)}
-                onDeleted={onDeleted}
-                onError={onError}
-                onEdit={onEdit}
-                isEditing={e.id === editingId}
-              />
-            ))}
-          </ul>
-        )}
-        <Button variant="outline" size="sm" onClick={scan} disabled={scanning || !calendars}>
-          {scanning ? <Loader2 className="animate-spin" /> : <Search />}
-          {scanning ? t.events.scanning : t.events.scan}
-        </Button>
-      </CardContent>
-    </Card>
+        <div className="flex items-center gap-1">
+          <Button variant="ghost" size="sm" onClick={scan} disabled={scanning || !calendars}>
+            {scanning ? <Loader2 className="animate-spin" /> : <Search />}
+            {scanning ? t.events.scanning : t.events.scan}
+          </Button>
+          <Button variant="ghost" size="icon-sm" onClick={onRefresh} aria-label={t.events.refresh}>
+            <RefreshCw />
+          </Button>
+        </div>
+      </div>
+
+      {events === null ? (
+        <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
+          {[0, 1, 2].map((i) => (
+            <Skeleton key={i} className="h-44 rounded-2xl" />
+          ))}
+        </div>
+      ) : events.length === 0 ? (
+        <div className="flex flex-col items-center gap-2 rounded-2xl border-2 border-dashed px-4 py-10 text-center text-sm text-muted-foreground">
+          <CalendarDays className="size-8 opacity-40" />
+          {t.events.empty}
+        </div>
+      ) : (
+        <ul className="grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
+          {events.map((e) => (
+            <EventCard
+              // Remount after an edit so verification re-runs against the new rule.
+              key={`${e.id}:${e.etag ?? ""}`}
+              event={e}
+              calendar={calendars?.find((c) => c.id === e.calendarId)}
+              onDeleted={onDeleted}
+              onError={onError}
+              onEdit={onEdit}
+              isEditing={e.id === editingId}
+            />
+          ))}
+        </ul>
+      )}
+
+      <p className="flex items-start gap-1.5 text-xs text-muted-foreground">
+        <Info className="mt-px size-3.5 shrink-0" /> {t.events.editTip}
+      </p>
+    </section>
   )
 }
 
@@ -109,7 +113,7 @@ type Verification =
   | { state: "mismatch"; google: string[]; expected: string[]; next: Date | null }
   | { state: "error" }
 
-function EventRow({
+function EventCard({
   event,
   calendar,
   onDeleted,
@@ -129,6 +133,7 @@ function EventRow({
   const spec = specFromEvent(event)
   const [verification, setVerification] = useState<Verification>({ state: "checking" })
   const [deleting, setDeleting] = useState(false)
+  const [confirmOpen, setConfirmOpen] = useState(false)
 
   // Ask Google for the next few instances and compare with our own RFC 7529 expansion.
   useEffect(() => {
@@ -168,62 +173,86 @@ function EventRow({
   }
 
   const next = verification.state === "ok" || verification.state === "mismatch" ? verification.next : null
+  const color = calendar?.backgroundColor ?? "var(--primary)"
+  const external = event.extendedProperties?.private?.[APP_MARKER.key] !== APP_MARKER.value
 
   return (
-    <li className={cn("flex flex-col gap-3 px-4 py-3 sm:flex-row sm:items-center", isEditing && "bg-primary/5")}>
-      <div className="min-w-0 flex-1 space-y-1">
-        <p className="flex items-center gap-2 font-medium">
-          <span className="size-2.5 shrink-0 rounded-full" style={{ background: calendar?.backgroundColor ?? "var(--primary)" }} />
-          <span className="truncate">{event.summary || t.events.untitled}</span>
-          <VerificationBadge v={verification} />
-          {event.extendedProperties?.private?.[APP_MARKER.key] !== APP_MARKER.value && (
-            <Badge variant="outline" className="h-5 text-[0.65rem] font-normal">
-              {t.events.external}
-            </Badge>
-          )}
-        </p>
-        <p className="text-sm text-muted-foreground">
-          {spec ? t.describe(spec) : event.recurrence?.join(" ")}
-          {calendar && <span className="text-muted-foreground/70"> · {calName(calendar)}</span>}
-        </p>
-        <p className="text-xs text-muted-foreground">
+    <li
+      className={cn(
+        "group relative flex flex-col overflow-hidden rounded-2xl border bg-card/90 shadow-sm shadow-primary/5 transition-shadow hover:shadow-md",
+        isEditing && "ring-2 ring-primary/50",
+      )}
+    >
+      <span className="h-1.5 w-full" style={{ background: color }} />
+      <div className="flex flex-1 flex-col gap-3 p-4">
+        <div className="flex items-start gap-2">
+          <div className="min-w-0 flex-1">
+            <p className="flex items-center gap-1.5 font-semibold">
+              <span className="truncate">{event.summary || t.events.untitled}</span>
+              <VerificationBadge v={verification} />
+            </p>
+            <p className="truncate text-sm text-primary">{spec ? t.describe(spec) : event.recurrence?.join(" ")}</p>
+          </div>
+          <DropdownMenu>
+            <DropdownMenuTrigger render={<Button variant="ghost" size="icon-sm" aria-label={t.events.more} className="-me-1.5 -mt-1" />}>
+              {deleting ? <Loader2 className="animate-spin" /> : <MoreHorizontal />}
+            </DropdownMenuTrigger>
+            <DropdownMenuContent align="end" className="w-44">
+              <DropdownMenuItem render={<a href={event.htmlLink} target="_blank" rel="noopener noreferrer" />}>
+                <ExternalLink /> {t.events.open}
+              </DropdownMenuItem>
+              <DropdownMenuItem variant="destructive" onClick={() => setConfirmOpen(true)}>
+                <Trash2 /> {t.events.delete}
+              </DropdownMenuItem>
+            </DropdownMenuContent>
+          </DropdownMenu>
+        </div>
+
+        <div className="rounded-xl bg-muted/60 px-3 py-2.5">
           {verification.state === "checking" ? (
-            <Skeleton className="inline-block h-3 w-40 align-middle" />
+            <Skeleton className="h-12 w-full" />
           ) : next ? (
             <>
-              {t.events.next} <span className="font-medium text-foreground">{shortDate.format(next)}</span> · {formatHebrew(new HDate(next), { lang })} ·{" "}
-              {relativeFromToday(next, locale)}
+              <p className="font-display text-2xl leading-tight font-semibold">{relativeFromToday(next, locale)}</p>
+              <p className="text-xs text-muted-foreground">
+                {shortDate.format(next)} · {formatHebrew(new HDate(next), { lang })}
+              </p>
             </>
-          ) : verification.state !== "error" ? (
-            t.events.noUpcoming
-          ) : null}
-        </p>
+          ) : (
+            <p className="py-2 text-sm text-muted-foreground">{t.events.noUpcoming}</p>
+          )}
+        </div>
+
+        <div className="mt-auto flex items-center justify-between gap-2">
+          <span className="flex min-w-0 items-center gap-1.5 text-xs text-muted-foreground">
+            <span className="size-2 shrink-0 rounded-full" style={{ background: color }} />
+            <span className="truncate">{calendar ? calName(calendar) : ""}</span>
+            {external && (
+              <Badge variant="outline" className="h-5 shrink-0 text-[0.62rem] font-normal">
+                {t.events.external}
+              </Badge>
+            )}
+          </span>
+          <Button variant={isEditing ? "secondary" : "outline"} size="sm" onClick={() => onEdit(event)} disabled={isEditing || !spec}>
+            <PencilLine /> {isEditing ? t.events.editing : t.events.edit}
+          </Button>
+        </div>
       </div>
-      <div className="flex shrink-0 items-center gap-1">
-        <Button variant={isEditing ? "secondary" : "ghost"} size="sm" onClick={() => onEdit(event)} disabled={isEditing || !spec}>
-          <PencilLine /> {isEditing ? t.events.editing : t.events.edit}
-        </Button>
-        <Button variant="ghost" size="sm" render={<a href={event.htmlLink} target="_blank" rel="noopener noreferrer" />} nativeButton={false}>
-          <ExternalLink /> {t.events.open}
-        </Button>
-        <AlertDialog>
-          <AlertDialogTrigger render={<Button variant="ghost" size="icon-sm" aria-label={t.events.delete} disabled={deleting} />}>
-            {deleting ? <Loader2 className="animate-spin" /> : <Trash2 />}
-          </AlertDialogTrigger>
-          <AlertDialogContent>
-            <AlertDialogHeader>
-              <AlertDialogTitle>{t.events.deleteTitle(event.summary ?? "")}</AlertDialogTitle>
-              <AlertDialogDescription>{t.events.deleteDescription(calendar ? calName(calendar) : null)}</AlertDialogDescription>
-            </AlertDialogHeader>
-            <AlertDialogFooter>
-              <AlertDialogCancel>{t.events.cancel}</AlertDialogCancel>
-              <AlertDialogAction variant="destructive" onClick={remove}>
-                {t.events.deleteAll}
-              </AlertDialogAction>
-            </AlertDialogFooter>
-          </AlertDialogContent>
-        </AlertDialog>
-      </div>
+
+      <AlertDialog open={confirmOpen} onOpenChange={setConfirmOpen}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>{t.events.deleteTitle(event.summary ?? "")}</AlertDialogTitle>
+            <AlertDialogDescription>{t.events.deleteDescription(calendar ? calName(calendar) : null)}</AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>{t.events.cancel}</AlertDialogCancel>
+            <AlertDialogAction variant="destructive" onClick={remove}>
+              {t.events.deleteAll}
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </li>
   )
 }
