@@ -4,7 +4,7 @@ A single-page app that adds Google Calendar events repeating on the **Hebrew dat
 
 Google Calendar's API accepts RFC 7529 recurrence rules with `RSCALE=HEBREW` (e.g. `RRULE:FREQ=YEARLY;RSCALE=HEBREW`) and expands them correctly, but Google's own UI has no way to create them. This app fills that gap.
 
-**Live:** https://yossizahn.github.io/jgcalendar/
+**Live:** https://luach.yossizahn.tech/ (also https://yossizahn.github.io/jgcalendar/)
 
 ## Features
 
@@ -50,4 +50,6 @@ Stack: React 19, TypeScript, Vite 8, Tailwind CSS 4, shadcn/ui (Base UI), react-
 
 ## Deployment
 
-Pushing to `main` runs `.github/workflows/deploy.yml`: lint, tests, build (with `base: /jgcalendar/`), then deploy to GitHub Pages. To build the OAuth client ID in, set a repository **variable** `VITE_GOOGLE_CLIENT_ID`; otherwise the site asks for one on first run. Either way, add `https://yossizahn.github.io` to the client's **Authorized JavaScript origins**.
+Pushing to `main` runs `.github/workflows/deploy.yml`: lint, tests, build, then deploy to GitHub Pages. The build uses relative asset paths (`base: "./"`), so it works both at the custom domain's root and under `/jgcalendar/`; `public/jgcalendar/index.html` redirects the old path on the custom domain to the root.
+
+To build the OAuth client ID in, set a repository **variable** `VITE_GOOGLE_CLIENT_ID`; otherwise the site asks for one on first run. Add every origin the site is served from (`https://luach.yossizahn.tech`, `https://yossizahn.github.io`) to the client's **Authorized JavaScript origins**.
