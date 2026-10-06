@@ -75,11 +75,11 @@ export function EventsList({ events, calendars, onDeleted, onRefresh, onError, o
       {events === null ? (
         <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
           {[0, 1, 2].map((i) => (
-            <Skeleton key={i} className="h-44 rounded-2xl" />
+            <Skeleton key={i} className="h-44 rounded-lg" />
           ))}
         </div>
       ) : events.length === 0 ? (
-        <div className="flex flex-col items-center gap-2 rounded-2xl border-2 border-dashed px-4 py-10 text-center text-sm text-muted-foreground">
+        <div className="flex flex-col items-center gap-2 rounded-lg border border-dashed px-4 py-10 text-center text-sm text-muted-foreground">
           <CalendarDays className="size-8 opacity-40" />
           {t.events.empty}
         </div>
@@ -111,7 +111,7 @@ type Verification =
   | { state: "checking" }
   | { state: "ok"; next: Date | null }
   | { state: "mismatch"; google: string[]; expected: string[]; next: Date | null }
-  | { state: "error" }
+  | { state: "error"; next: Date | null }
 
 function EventCard({
   event,
@@ -152,7 +152,8 @@ function EventCard({
       })
       .catch((e) => {
         if (cancelled) return
-        setVerification({ state: "error" })
+        // Couldn't ask Google; still show the next date from our own expansion.
+        setVerification({ state: "error", next: spec ? (expand(spec, 1, startOfToday)[0]?.date ?? null) : null })
         onError(e, t.events.checkFailed(event.summary ?? ""))
       })
     return () => {
@@ -172,18 +173,15 @@ function EventCard({
     }
   }
 
-  const next = verification.state === "ok" || verification.state === "mismatch" ? verification.next : null
+  const next = verification.state === "checking" ? null : verification.next
   const color = calendar?.backgroundColor ?? "var(--primary)"
   const external = event.extendedProperties?.private?.[APP_MARKER.key] !== APP_MARKER.value
 
   return (
     <li
-      className={cn(
-        "group relative flex flex-col overflow-hidden rounded-2xl border bg-card/90 shadow-sm shadow-primary/5 transition-shadow hover:shadow-md",
-        isEditing && "ring-2 ring-primary/50",
-      )}
+      className={cn("group relative flex flex-col overflow-hidden rounded-lg border border-s-4 bg-card shadow-[0_1px_0_var(--border)]", isEditing && "ring-2 ring-seal/50")}
+      style={{ borderInlineStartColor: color }}
     >
-      <span className="h-1.5 w-full" style={{ background: color }} />
       <div className="flex flex-1 flex-col gap-3 p-4">
         <div className="flex items-start gap-2">
           <div className="min-w-0 flex-1">
@@ -191,7 +189,7 @@ function EventCard({
               <span className="truncate">{event.summary || t.events.untitled}</span>
               <VerificationBadge v={verification} />
             </p>
-            <p className="truncate text-sm text-primary">{spec ? t.describe(spec) : event.recurrence?.join(" ")}</p>
+            <p className="truncate text-sm text-muted-foreground">{spec ? t.describe(spec) : event.recurrence?.join(" ")}</p>
           </div>
           <DropdownMenu>
             <DropdownMenuTrigger render={<Button variant="ghost" size="icon-sm" aria-label={t.events.more} className="-me-1.5 -mt-1" />}>
@@ -208,12 +206,12 @@ function EventCard({
           </DropdownMenu>
         </div>
 
-        <div className="rounded-xl bg-muted/60 px-3 py-2.5">
+        <div className="border-y border-dashed py-2.5">
           {verification.state === "checking" ? (
             <Skeleton className="h-12 w-full" />
           ) : next ? (
             <>
-              <p className="font-display text-2xl leading-tight font-semibold">{relativeFromToday(next, locale)}</p>
+              <p className="font-display text-2xl leading-tight font-semibold text-seal">{relativeFromToday(next, locale)}</p>
               <p className="text-xs text-muted-foreground">
                 {shortDate.format(next)} · {formatHebrew(new HDate(next), { lang })}
               </p>

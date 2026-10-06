@@ -2,6 +2,7 @@ import { cn } from "cn"
 import {
   Bell,
   CalendarCheck2,
+  CalendarDays,
   Check,
   ChevronDown,
   Clock,
@@ -9,11 +10,12 @@ import {
   Copy,
   Info,
   Loader2,
+  type LucideIcon,
   MoonStar,
+  NotebookPen,
   PencilLine,
   Repeat,
   Save,
-  SlidersHorizontal,
   TriangleAlert,
   X,
 } from "lucide-react"
@@ -220,9 +222,9 @@ export function EventForm({ calendars, onCreated, onError, editing, onSaved, onC
   return (
     <div ref={cardRef} className="scroll-mt-20 space-y-6">
       {editing && (
-        <div className="flex items-center justify-between gap-3 rounded-xl border border-primary/30 bg-primary/[0.07] px-4 py-2.5">
+        <div className="flex items-center justify-between gap-3 rounded-md border border-seal/40 bg-seal/[0.06] px-4 py-2.5">
           <p className="flex min-w-0 items-center gap-2 text-sm">
-            <PencilLine className="size-4 shrink-0 text-primary" />
+            <PencilLine className="size-4 shrink-0 text-seal" />
             <span className="truncate">
               <span className="font-semibold">{t.form.editTitle}</span>
               <span className="text-muted-foreground"> · {editing.summary}</span>
@@ -295,8 +297,8 @@ export function EventForm({ calendars, onCreated, onError, editing, onSaved, onC
               className="h-10 w-full"
             />
             {spec && (
-              <p className="flex items-center gap-1.5 text-sm font-medium text-primary">
-                <Repeat className="size-3.5 shrink-0" /> {t.describe(spec)}
+              <p className="flex items-center gap-1.5 text-sm font-medium">
+                <Repeat className="size-3.5 shrink-0 text-seal" /> {t.describe(spec)}
               </p>
             )}
           </div>
@@ -323,88 +325,85 @@ export function EventForm({ calendars, onCreated, onError, editing, onSaved, onC
             </div>
           )}
 
-          {/* Options: collapsed to a one-line summary */}
-          <div className="rounded-xl border bg-background/60">
+          {/* Event details: a titled sheet with a plain-language summary; sections when opened */}
+          <div className="rounded-md border">
             <button
               type="button"
               onClick={() => setOptionsOpen((o) => !o)}
               aria-expanded={optionsOpen}
-              className="flex w-full items-center gap-3 px-4 py-3 text-start"
+              className="flex w-full items-center gap-3 px-4 py-3 text-start transition-colors hover:bg-muted/50"
             >
-              <SlidersHorizontal className="size-4 shrink-0 text-muted-foreground" />
-              <span className="flex min-w-0 flex-1 flex-wrap items-center gap-1.5">
-                <span className="me-1 text-sm font-medium">{t.form.options}</span>
-                {interval > 1 && <Chip>{`${t.form.every} ${interval} ${t.form.unit(freq, interval)}`}</Chip>}
-                <Chip>{endLabel}</Chip>
-                <Chip>
-                  <Clock className="size-3" /> {allDay ? t.form.allDay : `${startTime}–${endTime}`}
-                </Chip>
-                {calendar && (
-                  <Chip>
-                    <span className="size-2 rounded-full" style={{ background: calendar.backgroundColor ?? "var(--primary)" }} />
-                    <span className="max-w-32 truncate">{calName(calendar)}</span>
-                  </Chip>
-                )}
-                <Chip>
-                  <Bell className="size-3" /> {reminderLabel}
-                </Chip>
+              <span className="min-w-0 flex-1">
+                <span className="block font-display text-base font-semibold">{t.form.detailsTitle}</span>
+                <span className="block truncate text-sm text-muted-foreground">
+                  {[
+                    interval > 1 ? `${t.form.every} ${interval} ${t.form.unit(freq, interval)}` : null,
+                    endLabel,
+                    allDay ? t.form.allDay : `${startTime}–${endTime}`,
+                    calendar ? calName(calendar) : null,
+                    reminderLabel,
+                  ]
+                    .filter(Boolean)
+                    .join(" · ")}
+                </span>
               </span>
+              <span className="shrink-0 text-sm font-medium text-primary">{optionsOpen ? t.form.done : t.form.change}</span>
               <ChevronDown className={cn("size-4 shrink-0 text-muted-foreground transition-transform", optionsOpen && "rotate-180")} />
             </button>
 
             {optionsOpen && (
-              <div className="space-y-5 border-t px-4 py-4">
-                <OptionRow label={t.form.repeatSection}>
-                  <div className="flex items-center gap-2 text-sm text-muted-foreground">
-                    {t.form.every}
-                    <Input
-                      type="number"
-                      min={1}
-                      max={99}
-                      value={interval}
-                      onChange={(e) => setRepeatInterval(Number(e.target.value))}
-                      className="h-9 w-16 text-center"
-                      aria-label={t.form.intervalAria}
-                    />
-                    {t.form.unit(freq, interval)}
-                  </div>
-                </OptionRow>
-
-                <OptionRow label={t.form.ends}>
-                  <RadioGroup value={endType} onValueChange={(v) => setEndType(v as EndType)} className="gap-2">
-                    <label className="flex h-9 cursor-pointer items-center gap-2.5 text-sm">
-                      <RadioGroupItem value="never" /> {t.form.never}
-                    </label>
-                    <label className="flex h-9 cursor-pointer items-center gap-2.5 text-sm">
-                      <RadioGroupItem value="count" /> {t.form.after}
+              <div className="divide-y border-t">
+                <DetailRow icon={Repeat} label={t.form.repeatSection}>
+                  <div className="space-y-3">
+                    <div className="flex items-center gap-2 text-sm">
+                      {t.form.every}
                       <Input
                         type="number"
                         min={1}
-                        value={count}
-                        onFocus={() => setEndType("count")}
-                        onChange={(e) => setCount(Number(e.target.value))}
-                        className="h-9 w-20 text-center"
-                        aria-label={t.form.countAria}
+                        max={99}
+                        value={interval}
+                        onChange={(e) => setRepeatInterval(Number(e.target.value))}
+                        className="h-8 w-14 text-center"
+                        aria-label={t.form.intervalAria}
                       />
-                      {t.form.times}
-                    </label>
-                    <label className="flex h-9 cursor-pointer items-center gap-2.5 text-sm">
-                      <RadioGroupItem value="until" /> {t.form.on}
-                      <Input
-                        type="date"
-                        value={until}
-                        onFocus={() => setEndType("until")}
-                        onChange={(e) => setUntil(e.target.value)}
-                        className="h-9 w-44"
-                        aria-label={t.form.endDateAria}
+                      {t.form.unit(freq, interval)}
+                    </div>
+                    <div className="flex flex-wrap items-center gap-2">
+                      <span className="text-sm text-muted-foreground">{t.form.ends}</span>
+                      <Segmented
+                        aria-label={t.form.ends}
+                        value={endType}
+                        onChange={setEndType}
+                        options={[
+                          { value: "never", label: t.form.never },
+                          { value: "count", label: t.form.after },
+                          { value: "until", label: t.form.onDate },
+                        ]}
+                        className="h-8 [&>*]:px-2.5 [&>*]:text-xs"
                       />
-                    </label>
-                  </RadioGroup>
-                </OptionRow>
+                      {endType === "count" && (
+                        <span className="flex items-center gap-2 text-sm">
+                          <Input
+                            type="number"
+                            min={1}
+                            value={count}
+                            onChange={(e) => setCount(Number(e.target.value))}
+                            className="h-8 w-16 text-center"
+                            aria-label={t.form.countAria}
+                          />
+                          {t.form.times}
+                        </span>
+                      )}
+                      {endType === "until" && (
+                        <Input type="date" value={until} onChange={(e) => setUntil(e.target.value)} className="h-8 w-40" aria-label={t.form.endDateAria} />
+                      )}
+                    </div>
+                  </div>
+                </DetailRow>
 
-                <OptionRow label={t.form.detailsSection}>
-                  <div className="flex flex-wrap items-center gap-x-5 gap-y-3">
-                    <label className="flex cursor-pointer items-center gap-2.5 text-sm font-medium">
+                <DetailRow icon={Clock} label={t.form.timeSection}>
+                  <div className="flex flex-wrap items-center gap-x-4 gap-y-2">
+                    <label className="flex cursor-pointer items-center gap-2.5 text-sm">
                       <Switch
                         checked={allDay}
                         onCheckedChange={(v) => {
@@ -416,53 +415,52 @@ export function EventForm({ calendars, onCreated, onError, editing, onSaved, onC
                     </label>
                     {!allDay && (
                       <div className="flex flex-wrap items-center gap-2 text-sm">
-                        <Input type="time" value={startTime} onChange={(e) => setStartTime(e.target.value)} className="h-9 w-32" aria-label={t.form.startTimeAria} />
+                        <Input type="time" value={startTime} onChange={(e) => setStartTime(e.target.value)} className="h-8 w-28" aria-label={t.form.startTimeAria} />
                         <span className="text-muted-foreground">{t.form.to}</span>
-                        <Input type="time" value={endTime} onChange={(e) => setEndTime(e.target.value)} className="h-9 w-32" aria-label={t.form.endTimeAria} />
+                        <Input type="time" value={endTime} onChange={(e) => setEndTime(e.target.value)} className="h-8 w-28" aria-label={t.form.endTimeAria} />
                         <span dir="ltr" className="text-xs text-muted-foreground">
                           {timeZone.replace(/_/g, " ")}
                         </span>
                       </div>
                     )}
                   </div>
-                </OptionRow>
+                </DetailRow>
 
-                <div className="grid gap-4 sm:grid-cols-2">
-                  <OptionRow label={t.form.calendar}>
-                    <Select value={calendar?.id ?? null} onValueChange={(v) => v && setCalendarId(v)}>
-                      <SelectTrigger className="h-9 w-full">
-                        <SelectValue>
-                          {calendar ? <CalendarOption cal={calendar} /> : <span className="text-muted-foreground">{t.form.loading}</span>}
-                        </SelectValue>
-                      </SelectTrigger>
-                      <SelectContent>
-                        {calendars?.map((c) => (
-                          <SelectItem key={c.id} value={c.id}>
-                            <CalendarOption cal={c} />
-                          </SelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select>
-                  </OptionRow>
-                  <OptionRow label={t.form.reminder}>
-                    <Select value={String(reminder)} onValueChange={(v) => v && setReminder(v === "default" || v === "none" || v === "keep" ? v : Number(v))}>
-                      <SelectTrigger className="h-9 w-full">
-                        <SelectValue>{reminderLabel}</SelectValue>
-                      </SelectTrigger>
-                      <SelectContent>
-                        {reminderOptions.map((o) => (
-                          <SelectItem key={String(o.value)} value={String(o.value)}>
-                            {t.reminders[o.label]}
-                          </SelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select>
-                  </OptionRow>
-                </div>
+                <DetailRow icon={CalendarDays} label={t.form.calendar}>
+                  <Select value={calendar?.id ?? null} onValueChange={(v) => v && setCalendarId(v)}>
+                    <SelectTrigger className="h-8 w-full max-w-xs">
+                      <SelectValue>
+                        {calendar ? <CalendarOption cal={calendar} /> : <span className="text-muted-foreground">{t.form.loading}</span>}
+                      </SelectValue>
+                    </SelectTrigger>
+                    <SelectContent>
+                      {calendars?.map((c) => (
+                        <SelectItem key={c.id} value={c.id}>
+                          <CalendarOption cal={c} />
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </DetailRow>
 
-                <OptionRow label={`${t.form.descriptionLabel} ${t.form.optional}`}>
+                <DetailRow icon={Bell} label={t.form.reminder}>
+                  <Select value={String(reminder)} onValueChange={(v) => v && setReminder(v === "default" || v === "none" || v === "keep" ? v : Number(v))}>
+                    <SelectTrigger className="h-8 w-full max-w-xs">
+                      <SelectValue>{reminderLabel}</SelectValue>
+                    </SelectTrigger>
+                    <SelectContent>
+                      {reminderOptions.map((o) => (
+                        <SelectItem key={String(o.value)} value={String(o.value)}>
+                          {t.reminders[o.label]}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </DetailRow>
+
+                <DetailRow icon={NotebookPen} label={t.form.descriptionLabel} hint={t.form.optional}>
                   <Textarea id="desc" value={description} onChange={(e) => setDescription(e.target.value)} rows={2} placeholder={t.form.descriptionPlaceholder} />
-                </OptionRow>
+                </DetailRow>
               </div>
             )}
           </div>
@@ -470,7 +468,7 @@ export function EventForm({ calendars, onCreated, onError, editing, onSaved, onC
           <div className="space-y-2">
             <Button
               size="lg"
-              className="h-12 w-full bg-gradient-to-br from-primary to-[oklch(0.45_0.19_285)] text-base shadow-lg shadow-primary/25 hover:brightness-110 dark:to-[oklch(0.66_0.15_285)]"
+              className="h-11 w-full rounded-md text-base"
               disabled={!!missing.length || submitting}
               onClick={submit}
             >
@@ -529,21 +527,23 @@ export function EventForm({ calendars, onCreated, onError, editing, onSaved, onC
 /* ------------------------------------------------------------------ */
 
 function Panel({ className, children }: { className?: string; children: React.ReactNode }) {
-  return <section className={cn("rounded-2xl border bg-card/90 shadow-sm shadow-primary/5 backdrop-blur", className)}>{children}</section>
+  return <section className={cn("rounded-lg border bg-card shadow-[0_1px_0_var(--border)]", className)}>{children}</section>
 }
 
+/** Section heading in the display serif. */
 function Eyebrow({ children }: { children: React.ReactNode }) {
-  return <h2 className="mb-1 text-xs font-semibold tracking-[0.12em] text-primary uppercase">{children}</h2>
+  return <h2 className="mb-1 font-display text-lg font-semibold">{children}</h2>
 }
 
-function Chip({ children }: { children: React.ReactNode }) {
-  return <span className="inline-flex items-center gap-1 rounded-full bg-muted px-2 py-0.5 text-xs text-muted-foreground">{children}</span>
-}
-
-function OptionRow({ label, children }: { label: string; children: React.ReactNode }) {
+/** One labelled section of the details sheet: label column + controls. */
+function DetailRow({ icon: Icon, label, hint, children }: { icon: LucideIcon; label: string; hint?: string; children: React.ReactNode }) {
   return (
-    <div className="space-y-1.5">
-      <p className="text-xs font-medium text-muted-foreground">{label}</p>
+    <div className="grid gap-x-4 gap-y-2 px-4 py-3.5 sm:grid-cols-[9.5rem_minmax(0,1fr)] sm:items-start">
+      <p className="flex items-center gap-2 pt-1 text-sm font-medium">
+        <Icon className="size-4 shrink-0 text-muted-foreground" />
+        {label}
+        {hint && <span className="font-normal text-muted-foreground">{hint}</span>}
+      </p>
       {children}
     </div>
   )
@@ -556,13 +556,13 @@ function DateHero({ hdate, eveningOf }: { hdate: HDate | null; eveningOf?: Date 
   const shortDate = useDateFormat(SHORT_DATE)
   if (!hdate)
     return (
-      <div className="flex min-h-28 items-center justify-center rounded-xl border-2 border-dashed px-4 text-center text-sm text-muted-foreground">
+      <div className="flex min-h-24 items-center justify-center rounded-md border border-dashed px-4 text-center text-sm text-muted-foreground">
         {t.form.selectDay}
       </div>
     )
   return (
-    <div className="relative overflow-hidden rounded-xl bg-gradient-to-br from-primary/[0.09] via-primary/[0.04] to-gold/[0.12] px-5 py-4 ring-1 ring-primary/15" aria-live="polite">
-      <p dir="rtl" lang="he" className="font-display text-4xl leading-tight font-semibold text-primary sm:text-5xl">
+    <div className="border-b-[3px] border-double border-foreground/60 pb-3" aria-live="polite">
+      <p dir="rtl" lang="he" className="font-display text-4xl leading-tight font-semibold sm:text-5xl">
         {formatHebrewNative(hdate)}
       </p>
       <p className="mt-1 text-sm">
@@ -578,33 +578,25 @@ function DateHero({ hdate, eveningOf }: { hdate: HDate | null; eveningOf?: Date 
   )
 }
 
-/** One upcoming date as a small calendar-page card. */
+/** One upcoming date as a tear-off calendar page (לוח תלישה). */
 function OccurrenceCard({ occurrence: o, first, today }: { occurrence: Occurrence; first: boolean; today: boolean }) {
   const { t, lang, locale } = useI18n()
-  const weekday = useDateFormat({ weekday: "short" })
-  const monthYear = useDateFormat({ month: "short", year: "numeric" })
+  const weekday = useDateFormat({ weekday: "long" })
+  const monthYear = useDateFormat({ month: "long", year: "numeric" })
   return (
-    <li
-      className={cn(
-        "flex flex-col items-center rounded-xl border bg-background/70 px-2 pt-3 pb-2.5 text-center",
-        first && "border-gold/60 bg-gold/[0.08] ring-1 ring-gold/40",
-      )}
-    >
-      <span className="text-[0.7rem] font-semibold tracking-wider text-muted-foreground uppercase">{weekday.format(o.date)}</span>
-      <span className="font-display text-4xl leading-none font-semibold tabular-nums">{o.date.getDate()}</span>
-      <span className="mt-0.5 text-xs font-medium">{monthYear.format(o.date)}</span>
-      <span className="mt-2 w-full truncate border-t pt-1.5 text-[0.7rem] text-muted-foreground" dir="auto">
+    <li className={cn("flex flex-col overflow-hidden rounded-md border bg-card text-center", first && "border-seal/60")}>
+      <span className={cn("px-2 py-1 text-xs font-medium", first ? "bg-seal text-seal-foreground" : "bg-primary text-primary-foreground")}>
+        {weekday.format(o.date)}
+      </span>
+      <span className="pt-2 font-display text-5xl leading-none font-semibold tabular-nums">{o.date.getDate()}</span>
+      <span className="mt-1 text-xs font-medium">{monthYear.format(o.date)}</span>
+      <span className="mx-2 mt-2 truncate border-t border-dashed pt-1.5 text-[0.72rem] text-muted-foreground" dir="auto">
         {formatHebrew(o.hdate, { lang })}
       </span>
-      <span
-        className={cn(
-          "mt-1.5 rounded-full px-2 py-0.5 text-[0.65rem] font-medium",
-          first ? "bg-gold text-gold-foreground dark:text-background" : "bg-muted text-muted-foreground",
-        )}
-      >
+      <span className={cn("pb-2 text-[0.7rem]", first ? "font-semibold text-seal" : "text-muted-foreground")}>
         {today ? t.form.today : relativeFromToday(o.date, locale)}
+        {o.shifted && <span className="text-amber-700 dark:text-amber-400"> · {t.form.moved}</span>}
       </span>
-      {o.shifted && <span className="mt-1 text-[0.6rem] text-amber-700 dark:text-amber-400">{t.form.moved}</span>}
     </li>
   )
 }

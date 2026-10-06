@@ -17,7 +17,7 @@ export function Segmented<T extends string>({ value, onChange, options, classNam
     <ToggleGroupPrimitive
       value={[value]}
       onValueChange={(v) => v[0] && onChange(v[0] as T)}
-      className={cn("inline-flex h-9 items-center rounded-lg bg-muted p-1 text-muted-foreground", className)}
+      className={cn("inline-flex h-9 items-center rounded-md border border-input bg-card p-0.5 text-muted-foreground", className)}
       {...rest}
     >
       {options.map((o) => (
@@ -25,9 +25,9 @@ export function Segmented<T extends string>({ value, onChange, options, classNam
           key={o.value}
           value={o.value}
           className={cn(
-            "inline-flex h-full flex-1 items-center justify-center gap-1.5 rounded-md px-3 text-sm font-medium whitespace-nowrap transition-all outline-none",
+            "inline-flex h-full flex-1 items-center justify-center gap-1.5 rounded-[calc(var(--radius)-2px)] px-3 text-sm font-medium whitespace-nowrap transition-colors outline-none",
             "hover:text-foreground focus-visible:ring-3 focus-visible:ring-ring/50",
-            "data-pressed:bg-background data-pressed:text-foreground data-pressed:shadow-sm dark:data-pressed:bg-input/50",
+            "data-pressed:bg-primary data-pressed:text-primary-foreground",
           )}
         >
           {o.label}

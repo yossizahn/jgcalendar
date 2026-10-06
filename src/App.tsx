@@ -66,7 +66,7 @@ export default function App() {
 
   return (
     <div className="flex min-h-svh flex-col">
-      <header className="sticky top-0 z-20 border-b border-border/60 bg-background/70 backdrop-blur-lg">
+      <header className="sticky top-0 z-20 border-b bg-background/95">
         <div className="mx-auto flex h-14 max-w-6xl items-center justify-between gap-4 px-4">
           <div className="flex items-center gap-2.5">
             <Logo />
@@ -197,13 +197,8 @@ export default function App() {
 }
 
 function Logo() {
-  return (
-    <div className="relative flex size-9 items-center justify-center rounded-xl bg-gradient-to-br from-primary to-[oklch(0.42_0.19_285)] shadow-md shadow-primary/30 ring-1 ring-white/20">
-      <span lang="he" className="font-display text-xl leading-none font-bold text-gold">
-        א
-      </span>
-    </div>
-  )
+  // Same mark as the favicon: a tear-off luach page.
+  return <img src="./favicon.svg" alt="" className="size-9" />
 }
 
 function Avatar({ profile }: { profile: UserProfile }) {

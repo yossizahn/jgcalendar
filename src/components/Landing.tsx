@@ -23,13 +23,13 @@ export function Landing({ onConnect, connecting, expired, onAbout }: Props) {
     <div className="mx-auto grid max-w-5xl items-center gap-12 py-10 md:grid-cols-[1.1fr_1fr] md:py-20">
       <div className="space-y-6">
         <h1 className="font-display text-4xl leading-[1.05] font-semibold tracking-tight text-balance sm:text-6xl">
-          {t.landing.title((s) => <span className="text-primary">{s}</span>)}
+          {t.landing.title((s) => <em className="text-seal">{s}</em>)}
         </h1>
         <p className="max-w-prose text-lg text-pretty text-muted-foreground">
           {t.landing.body}
         </p>
         <div className="flex flex-wrap items-center gap-4">
-          <Button size="lg" className="h-12 gap-2 bg-gradient-to-br from-primary to-[oklch(0.45_0.19_285)] px-6 text-base shadow-lg shadow-primary/25 hover:brightness-110 dark:to-[oklch(0.66_0.15_285)]" onClick={onConnect} disabled={connecting}>
+          <Button size="lg" className="h-12 gap-2 rounded-md px-6 text-base" onClick={onConnect} disabled={connecting}>
             {connecting ? <Loader2 className="animate-spin" /> : <GoogleMark />}
             {expired ? t.landing.reconnect : t.landing.connect}
             {!connecting && <ArrowRight className="size-4 rtl:rotate-180" />}
@@ -46,8 +46,7 @@ export function Landing({ onConnect, connecting, expired, onAbout }: Props) {
       </div>
 
       <div className="relative">
-        <div className="absolute -inset-8 -z-10 rounded-[2.5rem] bg-gradient-to-br from-primary/20 via-gold/10 to-transparent blur-3xl" />
-        <div className="rounded-2xl border bg-card/90 p-5 shadow-xl shadow-primary/10 backdrop-blur">
+        <div className="rounded-lg border bg-card p-5 shadow-[0_1px_0_var(--border),0_12px_32px_-18px_oklch(0.3_0.05_262/0.35)]">
           <div className="flex items-start justify-between gap-3">
             <div>
               <p className="font-semibold">{t.landing.exampleTitle}</p>
@@ -55,7 +54,7 @@ export function Landing({ onConnect, connecting, expired, onAbout }: Props) {
                 <Repeat className="size-3.5" /> {t.describe(exampleSpec)}
               </p>
             </div>
-            <span dir="rtl" lang="he" className="font-display text-3xl font-semibold text-primary">
+            <span dir="rtl" lang="he" className="font-display text-3xl font-semibold text-seal">
               ט״ו בשבט
             </span>
           </div>
@@ -99,7 +98,7 @@ function DriftChart({ occurrences }: { occurrences: Occurrence[] }) {
           </text>
         </g>
       ))}
-      <polyline points={points.map((p) => p.join(",")).join(" ")} fill="none" className="stroke-primary/35" strokeWidth={1.5} strokeLinejoin="round" />
+      <polyline points={points.map((p) => p.join(",")).join(" ")} fill="none" className="stroke-foreground/25" strokeWidth={1} strokeLinejoin="round" />
       {occurrences.map((o, i) => {
         const [cx, cy] = points[i]
         return (
@@ -107,7 +106,7 @@ function DriftChart({ occurrences }: { occurrences: Occurrence[] }) {
             <text x={4} y={cy + 3} className="fill-muted-foreground text-[9px] tabular-nums">
               {o.date.getFullYear()}
             </text>
-            <circle cx={cx} cy={cy} r={i === 0 ? 5.5 : 4.5} className={i === 0 ? "fill-gold" : "fill-primary"} />
+            <circle cx={cx} cy={cy} r={i === 0 ? 5 : 4} className={i === 0 ? "fill-seal" : "fill-primary"} />
             <text x={cx + 9} y={cy + 3} className="fill-foreground text-[9px] font-medium" direction={lang === "he" ? "rtl" : "ltr"} textAnchor="start">
               {dayMonth.format(o.date)}
             </text>

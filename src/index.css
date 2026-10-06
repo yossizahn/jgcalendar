@@ -11,8 +11,9 @@
     --font-heading: var(--font-sans);
     /* Serif display face with Hebrew + Latin, for headings and big dates. */
     --font-display: 'Frank Ruhl Libre Variable', 'Frank Ruhl Libre', serif;
-    --color-gold: var(--gold);
-    --color-gold-foreground: var(--gold-foreground);
+    /* The one accent: the red printed luach calendars use for Shabbat and holidays. */
+    --color-seal: var(--seal);
+    --color-seal-foreground: var(--seal-foreground);
     /* Geist has no Hebrew glyphs, so Hebrew text falls through to Heebo everywhere. */
     --font-sans: 'Geist Variable', 'Heebo Variable', sans-serif;
     --color-sidebar-ring: var(--sidebar-ring);
@@ -56,32 +57,32 @@
 }
 
 :root {
-    --background: oklch(0.982 0.008 255);
-    --gold: oklch(0.78 0.14 78);
-    --gold-foreground: oklch(0.36 0.08 70);
-    --foreground: oklch(0.145 0 0);
-    --card: oklch(1 0 0);
-    --card-foreground: oklch(0.145 0 0);
-    --popover: oklch(1 0 0);
-    --popover-foreground: oklch(0.145 0 0);
-    --primary: oklch(0.48 0.17 262);
-    --primary-foreground: oklch(0.985 0 0);
-    --secondary: oklch(0.97 0 0);
-    --secondary-foreground: oklch(0.205 0 0);
-    --muted: oklch(0.955 0.01 262);
-    --muted-foreground: oklch(0.556 0 0);
-    --accent: oklch(0.97 0 0);
-    --accent-foreground: oklch(0.205 0 0);
+    --background: oklch(0.972 0.009 85);
+    --seal: oklch(0.52 0.18 27);
+    --seal-foreground: oklch(0.98 0.01 85);
+    --foreground: oklch(0.22 0.035 262);
+    --card: oklch(0.99 0.005 85);
+    --card-foreground: oklch(0.22 0.035 262);
+    --popover: oklch(0.99 0.005 85);
+    --popover-foreground: oklch(0.22 0.035 262);
+    --primary: oklch(0.3 0.07 262);
+    --primary-foreground: oklch(0.97 0.01 85);
+    --secondary: oklch(0.94 0.012 85);
+    --secondary-foreground: oklch(0.25 0.035 262);
+    --muted: oklch(0.945 0.011 85);
+    --muted-foreground: oklch(0.48 0.02 262);
+    --accent: oklch(0.94 0.012 85);
+    --accent-foreground: oklch(0.25 0.035 262);
     --destructive: oklch(0.577 0.245 27.325);
-    --border: oklch(0.91 0.012 262);
-    --input: oklch(0.922 0 0);
-    --ring: oklch(0.62 0.14 262);
+    --border: oklch(0.86 0.014 85);
+    --input: oklch(0.84 0.014 85);
+    --ring: oklch(0.5 0.12 262);
     --chart-1: oklch(0.87 0 0);
     --chart-2: oklch(0.556 0 0);
     --chart-3: oklch(0.439 0 0);
     --chart-4: oklch(0.371 0 0);
     --chart-5: oklch(0.269 0 0);
-    --radius: 0.625rem;
+    --radius: 0.375rem;
     --sidebar: oklch(0.985 0 0);
     --sidebar-foreground: oklch(0.145 0 0);
     --sidebar-primary: oklch(0.205 0 0);
@@ -93,26 +94,26 @@
 }
 
 .dark {
-    --background: oklch(0.16 0.025 265);
-    --gold: oklch(0.82 0.13 82);
-    --gold-foreground: oklch(0.88 0.1 85);
-    --foreground: oklch(0.985 0 0);
-    --card: oklch(0.205 0.028 265);
-    --card-foreground: oklch(0.985 0 0);
-    --popover: oklch(0.22 0.028 265);
-    --popover-foreground: oklch(0.985 0 0);
-    --primary: oklch(0.72 0.13 262);
-    --primary-foreground: oklch(0.18 0.03 262);
-    --secondary: oklch(0.27 0.03 265);
-    --secondary-foreground: oklch(0.985 0 0);
-    --muted: oklch(0.27 0.03 265);
-    --muted-foreground: oklch(0.708 0 0);
-    --accent: oklch(0.27 0.03 265);
-    --accent-foreground: oklch(0.985 0 0);
+    --background: oklch(0.18 0.018 262);
+    --seal: oklch(0.7 0.15 27);
+    --seal-foreground: oklch(0.18 0.02 262);
+    --foreground: oklch(0.93 0.012 85);
+    --card: oklch(0.215 0.02 262);
+    --card-foreground: oklch(0.93 0.012 85);
+    --popover: oklch(0.235 0.02 262);
+    --popover-foreground: oklch(0.93 0.012 85);
+    --primary: oklch(0.86 0.04 250);
+    --primary-foreground: oklch(0.2 0.03 262);
+    --secondary: oklch(0.27 0.02 262);
+    --secondary-foreground: oklch(0.93 0.012 85);
+    --muted: oklch(0.26 0.02 262);
+    --muted-foreground: oklch(0.7 0.015 85);
+    --accent: oklch(0.27 0.02 262);
+    --accent-foreground: oklch(0.93 0.012 85);
     --destructive: oklch(0.704 0.191 22.216);
-    --border: oklch(1 0 0 / 10%);
-    --input: oklch(1 0 0 / 15%);
-    --ring: oklch(0.6 0.12 262);
+    --border: oklch(1 0 0 / 13%);
+    --input: oklch(1 0 0 / 16%);
+    --ring: oklch(0.7 0.08 250);
     --chart-1: oklch(0.87 0 0);
     --chart-2: oklch(0.556 0 0);
     --chart-3: oklch(0.439 0 0);
@@ -134,11 +135,6 @@
     }
   body {
     @apply bg-background text-foreground;
-    /* Soft blue and gold glows behind the page. */
-    background-image:
-      radial-gradient(55rem 28rem at 100% -8rem, color-mix(in oklch, var(--primary) 16%, transparent), transparent 70%),
-      radial-gradient(40rem 22rem at -10% -6rem, color-mix(in oklch, var(--gold) 18%, transparent), transparent 70%);
-    background-repeat: no-repeat;
     }
   html {
     @apply font-sans;

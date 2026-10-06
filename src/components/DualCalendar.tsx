@@ -57,7 +57,7 @@ function DualDayButton({
         dir="auto"
         className={cn(
           "max-w-full truncate px-0.5 text-[0.62rem]! leading-none",
-          isMonthStart && "font-semibold text-primary opacity-100! group-data-[selected=true]/day:text-primary-foreground",
+          isMonthStart && "font-semibold text-seal opacity-100! group-data-[selected=true]/day:text-primary-foreground",
         )}
       >
         {secondary}
@@ -91,11 +91,19 @@ export function DualCalendar({ selected, onSelect, mode, onModeChange }: Props) 
     fixedWeeks: true,
     dir,
     locale: lang === "he" ? heLocale : undefined,
-    className: "w-full bg-transparent p-0 [--cell-radius:var(--radius-lg)] [--cell-size:--spacing(11)] sm:[--cell-size:--spacing(12)]",
+    // Printed-luach look: hairlines between weeks, a heavier rule under the weekday row,
+    // and Shabbat (the last column) in red.
+    className: cn(
+      "w-full bg-transparent p-0 [--cell-radius:var(--radius-sm)] [--cell-size:--spacing(11)] sm:[--cell-size:--spacing(12)]",
+      "[&_.rdp-weekdays]:border-b [&_.rdp-weekdays]:border-foreground/70 [&_.rdp-weekdays]:pb-1.5",
+      "[&_.rdp-week]:mt-0 [&_.rdp-week]:border-b [&_.rdp-week]:border-border [&_.rdp-week]:py-1",
+      "[&_.rdp-weekday:last-child]:font-semibold [&_.rdp-weekday:last-child]:text-seal",
+      "[&_.rdp-day:last-child_button:not([data-selected-single=true])]:text-seal",
+    ),
     classNames: {
       root: "w-full",
-      // Today: a gold ring instead of the default grey fill.
-      today: "rounded-(--cell-radius) text-foreground [&>button]:ring-2 [&>button]:ring-gold/70 [&>button]:ring-inset",
+      // Today: a red ring instead of the default grey fill.
+      today: "rounded-(--cell-radius) text-foreground [&>button]:ring-[1.5px] [&>button]:ring-seal [&>button]:ring-inset",
     },
     components: { DayButton },
   }
